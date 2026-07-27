@@ -68,7 +68,7 @@ cars.com-side prices for our own units.
 
 | Path | Target(s) | Result |
 |---|---|---|
-| Container curl / any local tool (incl. stealth browser) | all external retail hosts, even example.com | **403 at egress proxy CONNECT** — this environment's org network policy denies general web access; only package registries are open. Root local blocker; per policy, not routed around. |
+| Container curl / any local tool (incl. stealth browser) | all external retail hosts, even example.com | **403 at egress gateway CONNECT** — denied for every host tested (16:41–17:14 UTC), even though workspace settings show all-domain access. Consistent with the network policy being captured at session start; a fresh session should not hit this. Root local blocker; not routed around. |
 | WebFetch (server-side) | cars.com, vwnorthscottsdale.com, online.vwns, dealerrater, newcars, edmunds, penskeautomall, r.jina.ai, example.com | **403 on everything including example.com** — WebFetch is policy-gated in this session; its failures say nothing about the sites. |
 | Zapier webhook fetcher (works: 200 on example.com control) | cars.com, vwnorthscottsdale.com (normal + Googlebot UA), online.vwns, penskeautomall.com, edmunds.com | **403 from each site's WAF** (Akamai/Cloudflare IP-reputation blocking of datacenter IPs; Edmunds returned an explicit Access Denied page). |
 | Google SERP mining (WebSearch + Scrape Creators) | crawl-cached snippets | Worked — source of all partial evidence above. cars.com VDPs are not indexed with prices, so no cars.com-side data exists here. |
@@ -86,9 +86,10 @@ otherwise the gap is understated by $698 per unit.
 1. **Best (deterministic):** check the syndication feed mapping directly — in the
    inventory/feed tool (HomeNet/vAuto/CDK export for cars.com), see which price column
    is mapped to the cars.com `price` field. That is ground truth; no scraping needed.
-2. **Or:** re-run this exact audit from any session/machine with normal web egress
-   (desktop session or loosened network policy for this environment — allowlist
-   cars.com and vwnorthscottsdale.com). Both sites render VIN, stock #, and full price
+2. **Or:** re-run this exact audit from a **fresh session** — workspace settings show
+   all-domain network access, but this session's container captured the earlier
+   restrictive policy at start-up, so the setting never took effect here. A new session
+   (or any desktop/local machine) can read both sites' VIN, stock #, and full price
    stacks; the delta table then takes minutes.
 3. **Or:** request the store's listing export from the cars.com dealer rep and diff it
    against the site's after-incentive prices.
