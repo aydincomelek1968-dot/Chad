@@ -89,6 +89,31 @@ Two of these independently corroborate the prior session's crawl-cached figures
 ($24,883 Jetta; $39,073 Tiguan) captured days earlier from a different source —
 cross-session, cross-method agreement on the same units.
 
+### Second independent extraction (replication)
+
+This audit was run twice, in parallel, by two sessions that shared no intermediate
+data and used different collection paths — one reading cars.com through server-side
+fetch and our site through a stealth browser, the other reading both through a
+stealth browser and extracting cars.com prices from the dealer-inventory page's
+embedded `vehicleArray`. **Both passes independently produced identical figures:**
+136 units, $463,428 total, the $368,500 / $94,928 split, 128 bonus-carrying units,
+$3,407 average, the same per-model table, and the same `MSRP − Discount + $698`
+identity on 136 of 136 units with zero exceptions.
+
+The second pass added two checks worth recording:
+
+- **Displayed-price verification.** For all **136/136** units, the price in the
+  page's embedded listing data was compared against the rendered `.primary-price`
+  element a shopper actually sees. **Zero mismatches** — the extracted number is the
+  number on screen, not an internal field that might differ from the display.
+- **The program boundary reproduces itself.** Of our 41 Tiguans, the **36** non-SEL
+  units each carry exactly **$2,500** and the **5** SEL R-Line units carry **$0** —
+  reproducing the published "2026 Tiguan, excludes SEL trims" eligibility rule
+  exactly, purely from parsed VDP markup with no eligibility logic applied. The three
+  Golf R units are likewise bonus-free. That the extraction independently rediscovers
+  the factory program's own trim boundary is strong evidence the price stacks were
+  parsed correctly rather than pattern-matched.
+
 ---
 
 ## Competitor SRP rank — top 3 flagged models
@@ -339,6 +364,16 @@ egress block was misdiagnosed as an org policy):
 3. The system `cryptography` package was broken (`_cffi_backend` missing), which
    blocked the stealth binary's signature verification — fixed by a pip upgrade.
 
+The parallel session hit the same browser-TLS wall and traced it to a second,
+independent cause worth recording alongside the CA fix: Chromium's **post-quantum
+TLS ClientHello** (~1,831 bytes, split across records) is rejected outright by the
+egress gateway's TLS terminator, which resets the connection before any certificate
+is exchanged. A `--log-net-log` capture showed `SSL_HANDSHAKE_ERROR` with
+`error_lib 35 / error_reason 101` on the very first flight. Launching Chromium with
+**`--ssl-version-max=tls1.2`** avoids the oversized hello and makes every
+browser-based read work directly through the agent proxy, with no mitmproxy chaining
+required. Either remedy alone is enough; the flag is the cheaper one to reproduce.
+
 ## Recommended fix
 
 The defect is a **feed field mapping**, not a pricing error: the cars.com export is
@@ -354,3 +389,14 @@ fee added) instead of the after-incentive lowest price. Two changes:
 
 Priority order by recoverable dollars: Atlas (42 units, $176k), Tiguan (41, $119k),
 Atlas Cross Sport (12, $50k), ID.4 (7 units but $6,698 each — highest per-unit gap).
+
+**Verify after the next feed push** by re-reading
+`cars.com/dealers/109556/volkswagen-north-scottsdale/inventory/?stock_type=new&makes[]=volkswagen&page_size=100`
+and confirming that non-SEL Tiguans land $2,500 *below* MSRP-minus-discount rather
+than $698 above it. The identity proven here — `(MSRP − Discount) + 698` on 136 of
+136 units — is precise enough to tell you immediately whether the remap took effect.
+
+**Time sensitivity.** The Tiguan Customer Bonus runs **Jul 1 – Aug 31, 2026**. Every
+day the mapping stays wrong is a day 128 bonus-eligible units are advertised to
+third-party shoppers above their real price, inside the program window the bonus was
+funded to move them in.
