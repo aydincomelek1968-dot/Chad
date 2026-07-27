@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Autotrader Syndication Gap — VW North Scottsdale</title>
+<style>
+:root{color-scheme:light dark;
+ --surface-1:#fcfcfb;--plane:#f9f9f7;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;
+ --grid:#e1e0d9;--axis:#c3c2b7;--border:rgba(11,11,11,.10);
+ --s1:#2a78d6;--s2:#eb6834;--good:#006300;--crit:#d03b3b;--wash:#eef4fd;}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme=light])){
+ --surface-1:#1a1a19;--plane:#0d0d0d;--ink:#fff;--ink2:#c3c2b7;--muted:#898781;
+ --grid:#2c2c2a;--axis:#383835;--border:rgba(255,255,255,.10);
+ --s1:#3987e5;--s2:#d95926;--good:#0ca30c;--crit:#d03b3b;--wash:#15233a;}}
+:root[data-theme=dark]{--surface-1:#1a1a19;--plane:#0d0d0d;--ink:#fff;--ink2:#c3c2b7;
+ --muted:#898781;--grid:#2c2c2a;--axis:#383835;--border:rgba(255,255,255,.10);
+ --s1:#3987e5;--s2:#d95926;--good:#0ca30c;--crit:#d03b3b;--wash:#15233a;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+ font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;}
+.wrap{max-width:880px;margin:0 auto;padding:44px 30px 72px}
+header.top{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:28px}
+.eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+ font-weight:600;margin:0 0 8px}
+h1{font-size:29px;line-height:1.22;margin:0 0 10px;letter-spacing:-.015em}
+.meta{color:var(--ink2);font-size:13.5px;margin:0}
+.verdict{display:inline-flex;align-items:center;gap:9px;margin-top:16px;
+ background:var(--crit);color:#fff;padding:7px 15px;border-radius:999px;
+ font-weight:700;font-size:13px;letter-spacing:.03em}
+.verdict .dot{width:8px;height:8px;border-radius:50%;background:#fff;opacity:.9}
+.repl{margin-top:13px;font-size:12.5px;color:var(--ink2);background:var(--wash);
+ border-radius:8px;padding:10px 13px;line-height:1.5}
+.repl strong{color:var(--good)}
+.urgent{border-left:3px solid var(--crit);background:var(--surface-1);
+ border:1px solid var(--border);border-left:3px solid var(--crit);
+ border-radius:8px;padding:14px 17px;margin:20px 0;font-size:14px}
+h2{font-size:19px;margin:44px 0 6px;letter-spacing:-.01em;
+ padding-bottom:8px;border-bottom:1px solid var(--border)}
+h2 .kicker{color:var(--muted);font-weight:400;font-size:13px;margin-left:8px}
+h3{font-size:15.5px;margin:0 0 3px}
+p{margin:11px 0}
+.lede{font-size:16px;color:var(--ink2)}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--wash);
+ padding:1px 5px;border-radius:4px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0 8px}
+.tile{background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:14px}
+.tile .v{font-size:25px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.tile .k{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.35}
+.tile.hero .v{color:var(--crit)}
+.formula{background:var(--surface-1);border:1px solid var(--border);
+ border-left:3px solid var(--s1);border-radius:8px;padding:16px 18px;margin:18px 0}
+.formula .f{font:15px ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:600}
+.formula .c{font-size:13px;color:var(--ink2);margin-top:7px}
+figure{margin:20px 0 8px;background:var(--surface-1);border:1px solid var(--border);
+ border-radius:10px;padding:18px 16px 12px}
+figcaption{font-size:12.5px;color:var(--muted);margin-top:10px;padding:0 4px}
+svg{width:100%;height:auto;display:block;overflow:visible}
+.colhead{font-size:12px;fill:var(--muted);font-weight:600;letter-spacing:.05em;
+ text-transform:uppercase}
+.rule{stroke:var(--border);stroke-width:1}
+.guide{stroke:var(--grid);stroke-width:1;stroke-dasharray:2 3}
+.rankno{font-size:12px;fill:var(--muted);font-weight:700}
+.axis{stroke:var(--axis);stroke-width:1}
+.grid{stroke:var(--grid);stroke-width:1}
+.tick{font-size:11px;fill:var(--muted)}
+.slopeline{stroke:var(--muted);stroke-width:2;fill:none;opacity:.42}
+.dot{fill:var(--muted);stroke:var(--surface-1);stroke-width:2}
+.dlabel{font-size:12px;fill:var(--ink2)}
+.dprice{font-size:12px;fill:var(--muted);font-variant-numeric:tabular-nums}
+.ln.us .slopeline{stroke:var(--s1);stroke-width:3;opacity:1}
+.ln.us .dot{fill:var(--s1);r:7}
+.ln.us .dlabel{fill:var(--ink);font-weight:700}
+.ln.us .dprice{fill:var(--ink);font-weight:600}
+.ln:hover .slopeline{opacity:1;stroke-width:3.5}
+.ln:hover .dlabel{fill:var(--ink)}
+.brect{fill:var(--s1)}
+.blabel{font-size:12.5px;fill:var(--ink2)}
+.bval{font-size:12.5px;fill:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+.bunits{fill:var(--muted);font-weight:400}
+.bar:hover .brect{fill:var(--s2)}
+.r1{fill:var(--s1)}.r2{fill:var(--s2)}
+.seglab{font-size:13.5px;fill:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+.segsub{font-size:12px;fill:var(--ink2)}
+.rankcard{background:var(--surface-1);border:1px solid var(--border);border-radius:10px;
+ padding:18px 18px 14px;margin:18px 0}
+.rankhead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+ margin-bottom:6px}
+.sub{margin:0;font-size:12.5px;color:var(--muted)}
+.rankmove{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.rk{font-size:17px;font-weight:800;padding:3px 10px;border-radius:7px}
+.rk.before{background:var(--wash);color:var(--ink2)}
+.rk.after{background:var(--good);color:#fff}
+.arrow{color:var(--muted);font-size:15px}
+.ofn{font-size:11.5px;color:var(--muted)}
+.note{font-size:13px;color:var(--ink2);margin:6px 0 0}
+.sens{font-size:12.5px;color:var(--muted);margin:7px 0 0;padding-left:11px;
+ border-left:2px solid var(--grid)}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:13px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+ font-weight:700;border-bottom:1.5px solid var(--axis)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr:hover{background:var(--wash)}
+.dl{font-weight:700;color:var(--crit)}
+tfoot td{font-weight:700;border-top:1.5px solid var(--axis);border-bottom:none}
+.callout{background:var(--wash);border-radius:9px;padding:15px 18px;margin:18px 0;
+ font-size:14px}
+.callout strong{color:var(--ink)}
+ul{margin:11px 0;padding-left:20px}li{margin:5px 0}
+.appx table{font-size:10.5px}
+.appx td,.appx th{padding:2.5px 5px;white-space:nowrap}
+.appx th{white-space:normal}
+.appx .vin{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px}
+.appx .bon{font-size:10px;color:var(--ink2)}
+.appx .n{color:var(--muted)}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--border);
+ font-size:12px;color:var(--muted)}
+@media print{
+ @page{size:letter;margin:14mm 12mm}
+ body{background:#fff}
+ .wrap{max-width:none;padding:0}
+ .rankcard,figure,.tile,.callout,.formula{break-inside:avoid}
+ h2{break-after:avoid}
+ .pagebreak{break-before:page}
+ tbody tr:hover{background:none}
+ .appx table{font-size:9px}
+ thead{display:table-header-group}
+ tfoot{display:table-row-group}
+}
+@media (max-width:720px){.tiles{grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body><div class="wrap">
+
+<header class="top">
+  <p class="eyebrow">Syndication Audit · Autotrader · Penske #182</p>
+  <h1>Autotrader hides $368,500 &mdash;<br>the same defect, a second marketplace</h1>
+  <p class="meta">Volkswagen North Scottsdale · Autotrader dealer 46562864 ·
+     All prices read live on 27 July 2026</p>
+  <div class="verdict"><span class="dot"></span>VERDICT: CONFIRMED — 128 of 136 units affected</div>
+  <div class="repl"><strong>Companion audit.</strong> This is the Autotrader channel. The
+  cars.com channel was audited separately and found the identical defect on the identical
+  units. The dollar figures differ for a real reason, explained below — not because the
+  two passes disagree.</div>
+</header>
+
+<p class="lede">Autotrader publishes our pre-bonus advertised price and never applies the
+customer bonus. As on cars.com, this is an exact arithmetic identity rather than a
+sampled inference.</p>
+
+<div class="formula">
+  <div class="f">Autotrader price = MSRP − Discount + $698 Dealer Fees</div>
+  <div class="c">True for <strong>136 of 136</strong> matched units — zero exceptions.
+  The customer bonus is applied on <strong>none</strong> of them.</div>
+</div>
+
+<div class="tiles">
+  <div class="tile hero"><div class="v">$368,500</div><div class="k">Bonus hidden from
+    Autotrader shoppers</div></div>
+  <div class="tile"><div class="v">128<span style="font-size:15px;color:var(--muted)">/136</span></div>
+    <div class="k">Units carrying a suppressed bonus</div></div>
+  <div class="tile"><div class="v">$2,879</div><div class="k">Average gap per affected unit</div></div>
+  <div class="tile"><div class="v">$6,000</div><div class="k">Worst per-unit gap (ID.4)</div></div>
+</div>
+
+<h2>Why this number is lower than cars.com's <span class="kicker">and why that is correct</span></h2>
+
+<p>The cars.com audit reported <strong>$463,428</strong>. This one reports
+<strong>$368,500</strong>. The $94,928 difference is exactly the $698 dealer fee across 136
+units — and it is <em>deliberately excluded here</em>. Autotrader displays a
+<strong>“Dealer Fees Included”</strong> badge under every price and its price convention
+<em>includes</em> dealer fees. cars.com's convention <em>excludes</em> them. So the same
+$698 is a genuine defect on one platform and correct behaviour on the other.</p>
+
+<figure><svg viewBox="0 0 720 168" role="img" class="comp" aria-label="Gap by channel"><text x="136" y="60" class="blabel" text-anchor="end">Autotrader</text><g class="seg"><title>Autotrader: suppressed bonus $368,500</title><rect x="150" y="40" width="395.6" height="28" rx="4" class="r1"/></g><text x="158" y="59" class="seglab">$368,500</text><text x="557.6" y="59" class="bval">$368,500</text><text x="150" y="83" class="segsub">fees included — $698 is legitimate here</text><text x="136" y="118" class="blabel" text-anchor="end">cars.com</text><g class="seg"><title>cars.com: suppressed bonus $368,500</title><rect x="150" y="98" width="395.6" height="28" rx="4" class="r1"/></g><text x="158" y="117" class="seglab">$368,500</text><g class="seg"><title>cars.com: $698 dealer fee counted as a gap because this platform excludes fees — $94,928</title><rect x="547.6" y="98" width="100.4" height="28" rx="4" class="r2"/></g><text x="555.6" y="117" class="seglab">$94,928</text><text x="660.0" y="117" class="bval">$463,428</text><text x="150" y="141" class="segsub">fees excluded — $698 is a real gap</text><rect x="150" y="8" width="14" height="10" rx="2" class="r1"/><text x="170" y="17" class="segsub">Suppressed customer bonus</text><rect x="380" y="8" width="14" height="10" rx="2" class="r2"/><text x="400" y="17" class="segsub">$698 dealer fee</text></svg>
+<figcaption>The suppressed bonus is common to both channels. The dealer-fee component
+counts as a gap only on cars.com, whose price convention excludes fees.</figcaption></figure>
+
+<div class="callout"><strong>Confirmed, not assumed.</strong> Larry H. Miller's comparable
+Tiguan lists at <strong>$35,258 on cars.com</strong> and <strong>$35,807 on Autotrader</strong>
+— a difference of exactly <strong>$549</strong>, the documentary fee they disclose on their
+own site. They exclude it on one platform and include it on the other, matching each
+platform's convention. Chapman's Autotrader price runs exactly MSRP + $589, their own fee.
+The fee behaviour is industry-wide; the suppressed bonus is ours.</div>
+
+<h2 class="pagebreak">The Autotrader-only finding <span class="kicker">our published MSRP is wrong</span></h2>
+
+<p>This channel exposes something cars.com does not. Autotrader prints an <strong>MSRP</strong>
+beside the price, and on our listings that number is frequently not the manufacturer's MSRP.</p>
+
+<div class="callout"><strong>On 33 units carrying no discount, Autotrader prints
+MSRP = our real MSRP + $698</strong> — for all 33, exactly. An Atlas 2.0T SE whose factory
+MSRP is <strong>$41,604</strong> is published as <strong>“MSRP $42,302.”</strong> The dealer
+fee has been folded into the manufacturer's suggested price.<br><br>
+<strong>On the 64 units that do carry a discount</strong>, the MSRP is correct but the
+published <strong>“Savings”</strong> is understated by exactly $698, because the fee is
+netted against the discount before display. Verified on all 64:
+<code>Savings = Discount − $698</code>.</div>
+
+<p>So on <strong>97 of 136</strong> units the published price stack misstates either MSRP or
+the discount. Overstating MSRP is the more serious of the two — it is a manufacturer figure,
+and a shopper who cross-checks it against VW's own site will find it wrong.</p>
+
+<h2>Rank impact</h2>
+
+<p>Comparables are matched by <strong>closest MSRP</strong>, because Autotrader collapses trim
+labels — our “SE R-Line Black” and the 4MOTION variant both publish as “SE R-Line”, making the
+label alone unusable. All prices below are fee-inclusive per this platform's convention, so
+no fee unwinding is applied, unlike the cars.com pass.</p>
+
+
+<div class="rankcard">
+  <div class="rankhead">
+    <div>
+      <h3>Tiguan SE R-Line, FWD</h3>
+      <p class="sub">comparable at <code>MSRP $39,496</code> · 21 of our units</p>
+    </div>
+    <div class="rankmove">
+      <span class="rk before">#3</span>
+      <span class="arrow">→</span>
+      <span class="rk after">#1</span>
+      <span class="ofn">of 5</span>
+    </div>
+  </div>
+  <svg viewBox="0 0 720 290" role="img" class="slope" aria-label="Rank change for Tiguan SE R-Line, FWD"><text x="208" y="26" class="colhead" text-anchor="middle">As listed today</text><text x="512" y="26" class="colhead" text-anchor="middle">If the feed were fixed</text><line x1="60" y1="36" x2="660" y2="36" class="rule"/><text x="56" y="56" class="rankno">#1</text><line x1="74" y1="52" x2="192" y2="52" class="guide"/><text x="662" y="56" class="rankno" text-anchor="end">#1</text><line x1="528" y1="52" x2="644" y2="52" class="guide"/><text x="56" y="102" class="rankno">#2</text><line x1="74" y1="98" x2="192" y2="98" class="guide"/><text x="662" y="102" class="rankno" text-anchor="end">#2</text><line x1="528" y1="98" x2="644" y2="98" class="guide"/><text x="56" y="148" class="rankno">#3</text><line x1="74" y1="144" x2="192" y2="144" class="guide"/><text x="662" y="148" class="rankno" text-anchor="end">#3</text><line x1="528" y1="144" x2="644" y2="144" class="guide"/><text x="56" y="194" class="rankno">#4</text><line x1="74" y1="190" x2="192" y2="190" class="guide"/><text x="662" y="194" class="rankno" text-anchor="end">#4</text><line x1="528" y1="190" x2="644" y2="190" class="guide"/><text x="56" y="240" class="rankno">#5</text><line x1="74" y1="236" x2="192" y2="236" class="guide"/><text x="662" y="240" class="rankno" text-anchor="end">#5</text><line x1="528" y1="236" x2="644" y2="236" class="guide"/><g class="ln other moved"><title>Larry H. Miller: rank #1 $35,807 → rank #2 $35,807</title><line x1="208" y1="52" x2="512" y2="98" class="slopeline"/><circle cx="208" cy="52" r="6" class="dot"/><circle cx="512" cy="98" r="6" class="dot"/><text x="190" y="43" class="dlabel" text-anchor="end">Larry H. Miller</text><text x="190" y="65" class="dprice" text-anchor="end">$35,807</text><text x="530" y="89" class="dlabel">Larry H. Miller</text><text x="530" y="111" class="dprice">$35,807</text></g><g class="ln other moved"><title>Camelback: rank #2 $37,378 → rank #3 $37,378</title><line x1="208" y1="98" x2="512" y2="144" class="slopeline"/><circle cx="208" cy="98" r="6" class="dot"/><circle cx="512" cy="144" r="6" class="dot"/><text x="190" y="89" class="dlabel" text-anchor="end">Camelback</text><text x="190" y="111" class="dprice" text-anchor="end">$37,378</text><text x="530" y="135" class="dlabel">Camelback</text><text x="530" y="157" class="dprice">$37,378</text></g><g class="ln us moved"><title>VW North Scottsdale: rank #3 $37,544 → rank #1 $35,044</title><line x1="208" y1="144" x2="512" y2="52" class="slopeline"/><circle cx="208" cy="144" r="6" class="dot"/><circle cx="512" cy="52" r="6" class="dot"/><text x="190" y="135" class="dlabel" text-anchor="end">VW North Scottsdale — us</text><text x="190" y="157" class="dprice" text-anchor="end">$37,544</text><text x="530" y="43" class="dlabel">VW North Scottsdale — us</text><text x="530" y="65" class="dprice">$35,044</text></g><g class="ln other"><title>Lunde&#x27;s Peoria: rank #4 $38,011 → rank #4 $38,011</title><line x1="208" y1="190" x2="512" y2="190" class="slopeline"/><circle cx="208" cy="190" r="6" class="dot"/><circle cx="512" cy="190" r="6" class="dot"/><text x="190" y="181" class="dlabel" text-anchor="end">Lunde&#x27;s Peoria</text><text x="190" y="203" class="dprice" text-anchor="end">$38,011</text><text x="530" y="181" class="dlabel">Lunde&#x27;s Peoria</text><text x="530" y="203" class="dprice">$38,011</text></g><g class="ln other"><title>Chapman: rank #5 $40,196 → rank #5 $40,196</title><line x1="208" y1="236" x2="512" y2="236" class="slopeline"/><circle cx="208" cy="236" r="6" class="dot"/><circle cx="512" cy="236" r="6" class="dot"/><text x="190" y="227" class="dlabel" text-anchor="end">Chapman</text><text x="190" y="249" class="dprice" text-anchor="end">$40,196</text><text x="530" y="227" class="dlabel">Chapman</text><text x="530" y="249" class="dprice">$40,196</text></g></svg>
+  <p class="note">Our comparable is within $213 of Larry Miller&#x27;s on MSRP ($39,496 vs $39,709), so this is a like-for-like pairing. Fixing the feed makes us cheapest outright.</p>
+  
+</div>
+<div class="rankcard">
+  <div class="rankhead">
+    <div>
+      <h3>Atlas SE w/Technology, FWD</h3>
+      <p class="sub">comparable at <code>MSRP $47,834</code> · 13 of our units</p>
+    </div>
+    <div class="rankmove">
+      <span class="rk before">#3</span>
+      <span class="arrow">→</span>
+      <span class="rk after">#1</span>
+      <span class="ofn">of 3</span>
+    </div>
+  </div>
+  <svg viewBox="0 0 720 198" role="img" class="slope" aria-label="Rank change for Atlas SE w/Technology, FWD"><text x="208" y="26" class="colhead" text-anchor="middle">As listed today</text><text x="512" y="26" class="colhead" text-anchor="middle">If the feed were fixed</text><line x1="60" y1="36" x2="660" y2="36" class="rule"/><text x="56" y="56" class="rankno">#1</text><line x1="74" y1="52" x2="192" y2="52" class="guide"/><text x="662" y="56" class="rankno" text-anchor="end">#1</text><line x1="528" y1="52" x2="644" y2="52" class="guide"/><text x="56" y="102" class="rankno">#2</text><line x1="74" y1="98" x2="192" y2="98" class="guide"/><text x="662" y="102" class="rankno" text-anchor="end">#2</text><line x1="528" y1="98" x2="644" y2="98" class="guide"/><text x="56" y="148" class="rankno">#3</text><line x1="74" y1="144" x2="192" y2="144" class="guide"/><text x="662" y="148" class="rankno" text-anchor="end">#3</text><line x1="528" y1="144" x2="644" y2="144" class="guide"/><g class="ln other moved"><title>Lunde&#x27;s Peoria: rank #1 $45,333 → rank #2 $45,333</title><line x1="208" y1="52" x2="512" y2="98" class="slopeline"/><circle cx="208" cy="52" r="6" class="dot"/><circle cx="512" cy="98" r="6" class="dot"/><text x="190" y="43" class="dlabel" text-anchor="end">Lunde&#x27;s Peoria</text><text x="190" y="65" class="dprice" text-anchor="end">$45,333</text><text x="530" y="89" class="dlabel">Lunde&#x27;s Peoria</text><text x="530" y="111" class="dprice">$45,333</text></g><g class="ln other moved"><title>Camelback: rank #2 $45,838 → rank #3 $45,838</title><line x1="208" y1="98" x2="512" y2="144" class="slopeline"/><circle cx="208" cy="98" r="6" class="dot"/><circle cx="512" cy="144" r="6" class="dot"/><text x="190" y="89" class="dlabel" text-anchor="end">Camelback</text><text x="190" y="111" class="dprice" text-anchor="end">$45,838</text><text x="530" y="135" class="dlabel">Camelback</text><text x="530" y="157" class="dprice">$45,838</text></g><g class="ln us moved"><title>VW North Scottsdale: rank #3 $45,932 → rank #1 $42,432</title><line x1="208" y1="144" x2="512" y2="52" class="slopeline"/><circle cx="208" cy="144" r="6" class="dot"/><circle cx="512" cy="52" r="6" class="dot"/><text x="190" y="135" class="dlabel" text-anchor="end">VW North Scottsdale — us</text><text x="190" y="157" class="dprice" text-anchor="end">$45,932</text><text x="530" y="43" class="dlabel">VW North Scottsdale — us</text><text x="530" y="65" class="dprice">$42,432</text></g></svg>
+  <p class="note">The strongest comparison in the audit: Lunde&#x27;s comparable unit carries an identical $47,834 MSRP to ours, so the $599 we trail them by is purely the missing bonus. Applying it puts us $2,901 clear of the field.</p>
+  <p class="sens"><strong>Sensitivity.</strong> Larry Miller and Chapman had no Atlas at this configuration in the returned result set, so this ranking is three-way rather than five-way.</p>
+</div>
+
+<div class="callout"><strong>Atlas Cross Sport is missing on purpose.</strong> Autotrader has no
+<code>atlas-cross-sport</code> model slug and the filter fallback returned unfiltered inventory,
+so competitor prices could not be read at audit quality. Our own 12 Cross Sport units are fully
+counted in the $368,500; only the competitive comparison is absent. The cars.com pass ranked this
+model 4th → 3rd, but those are cars.com prices and do not transfer.</div>
+
+<h2>Where the money is <span class="kicker">bonus hidden by model</span></h2>
+
+<figure><svg viewBox="0 0 720 356" role="img" class="bars" aria-label="Dollars hidden from cars.com shoppers by model"><line x1="172.0" y1="22" x2="172.0" y2="338" class="grid"/><text x="172.0" y="14" class="tick" text-anchor="middle">$0k</text><line x1="280.0" y1="22" x2="280.0" y2="338" class="grid"/><text x="280.0" y="14" class="tick" text-anchor="middle">$37k</text><line x1="388.0" y1="22" x2="388.0" y2="338" class="grid"/><text x="388.0" y="14" class="tick" text-anchor="middle">$74k</text><line x1="496.0" y1="22" x2="496.0" y2="338" class="grid"/><text x="496.0" y="14" class="tick" text-anchor="middle">$110k</text><line x1="604.0" y1="22" x2="604.0" y2="338" class="grid"/><text x="604.0" y="14" class="tick" text-anchor="middle">$147k</text><g class="bar"><title>Atlas: $147,000 across 42 units</title><text x="150" y="49" class="blabel" text-anchor="end">Atlas</text><rect x="172" y="36" width="432.0" height="18" rx="4" class="brect"/><text x="614.0" y="50" class="bval">$147,000 <tspan class="bunits">· 42u</tspan></text></g><g class="bar"><title>Tiguan: $90,000 across 41 units</title><text x="150" y="83" class="blabel" text-anchor="end">Tiguan</text><rect x="172" y="70" width="264.5" height="18" rx="4" class="brect"/><text x="446.5" y="84" class="bval">$90,000 <tspan class="bunits">· 41u</tspan></text></g><g class="bar"><title>Atlas Cross Sport: $42,000 across 12 units</title><text x="150" y="117" class="blabel" text-anchor="end">Atlas Cross Sport</text><rect x="172" y="104" width="123.4" height="18" rx="4" class="brect"/><text x="305.4" y="118" class="bval">$42,000 <tspan class="bunits">· 12u</tspan></text></g><g class="bar"><title>ID.4: $42,000 across 7 units</title><text x="150" y="151" class="blabel" text-anchor="end">ID.4</text><rect x="172" y="138" width="123.4" height="18" rx="4" class="brect"/><text x="305.4" y="152" class="bval">$42,000 <tspan class="bunits">· 7u</tspan></text></g><g class="bar"><title>Jetta: $16,500 across 11 units</title><text x="150" y="185" class="blabel" text-anchor="end">Jetta</text><rect x="172" y="172" width="48.5" height="18" rx="4" class="brect"/><text x="230.5" y="186" class="bval">$16,500 <tspan class="bunits">· 11u</tspan></text></g><g class="bar"><title>Taos: $15,000 across 10 units</title><text x="150" y="219" class="blabel" text-anchor="end">Taos</text><rect x="172" y="206" width="44.1" height="18" rx="4" class="brect"/><text x="226.1" y="220" class="bval">$15,000 <tspan class="bunits">· 10u</tspan></text></g><g class="bar"><title>Golf GTI: $9,000 across 6 units</title><text x="150" y="253" class="blabel" text-anchor="end">Golf GTI</text><rect x="172" y="240" width="26.4" height="18" rx="4" class="brect"/><text x="208.4" y="254" class="bval">$9,000 <tspan class="bunits">· 6u</tspan></text></g><g class="bar"><title>Jetta GLI: $7,000 across 4 units</title><text x="150" y="287" class="blabel" text-anchor="end">Jetta GLI</text><rect x="172" y="274" width="20.6" height="18" rx="4" class="brect"/><text x="202.6" y="288" class="bval">$7,000 <tspan class="bunits">· 4u</tspan></text></g><g class="bar"><title>Golf R: $0 across 3 units</title><text x="150" y="321" class="blabel" text-anchor="end">Golf R</text><rect x="172" y="308" width="3.0" height="18" rx="4" class="brect"/><text x="182.0" y="322" class="bval">$0 <tspan class="bunits">· 3u</tspan></text></g><line x1="172" y1="22" x2="172" y2="338" class="axis"/></svg>
+<figcaption>Suppressed customer bonus summed across each model's affected units. Golf R carries
+no bonus on any of its 3 units, so it shows no gap.</figcaption></figure>
+
+<p>Priority follows the dollars: <strong>Atlas</strong> (42 units, $147,000) and
+<strong>Tiguan</strong> (41 units, $90,000) are 64% of the total. <strong>ID.4</strong> is the
+highest-value fix per unit — 7 cars at $6,000 of hidden bonus each.</p>
+
+<h2>Evidence, and one material limitation</h2>
+
+<div class="callout"><strong>Autotrader publishes no VIN anywhere</strong> — not on the search
+results page and not on the vehicle detail page; both were checked directly. This is the one
+respect in which this audit is weaker than the cars.com pass, and it cannot be fixed from this
+access path. The join is by <strong>advertised price</strong>, corroborated by <strong>MSRP and
+Savings</strong> — not by VIN.</div>
+
+<ul>
+<li><strong>136 of 137</strong> Autotrader listings match a computed advertised price
+(<code>MSRP − Discount + $698</code>) from our own live site data, exact to the dollar.</li>
+<li><strong>97 of those 136</strong> carry a second independent confirmation from Autotrader's
+own MSRP and Savings values (64 via true MSRP + savings, 33 via the $698 MSRP overstatement).</li>
+<li>The <strong>price multiset is identical to cars.com's</strong> 136 prices — same units, same
+numbers, two independent channels and two independent read paths.</li>
+<li>Because MSRP is shared across same-configuration units, this is a <strong>unit-level</strong>
+correspondence, not a VIN-level one. For a defect uniform across the whole inventory that does
+not change the totals, but it is stated rather than glossed.</li>
+<li><strong>One unmatched listing:</strong> a Tiguan SE R-Line at <strong>$38,073</strong>
+(listing 781071327) matches no current price on our site. Its price implies a $2,650 discount
+that no current unit carries — most likely a <strong>stale listing</strong>. Excluded from every
+figure here. It is a separate feed-freshness defect, and it runs in the shopper's favour.</li>
+<li><strong>Read-path fragility, controlled:</strong> Autotrader's model filter did not apply for
+competitor dealers, and the page conversion transposed price/MSRP columns on one dealer. Both
+were caught by requiring <code>PRICE = MSRP − SAVINGS</code> on every competitor row, and
+re-queried before use.</li>
+</ul>
+
+<h2>Recommended fix</h2>
+
+<p>The same one-line remap fixes both channels — but they need <strong>different</strong> fee
+handling, and a single global change would fix one and break the other.</p>
+
+<ol>
+<li><strong>Map the Autotrader <code>price</code> field to the bonus-inclusive lowest price.</strong>
+Recovers the full $368,500.</li>
+<li><strong>Keep the $698 in the price for Autotrader — but stop folding it into MSRP.</strong>
+The fee belongs in the price under this platform's convention; it does not belong in the MSRP
+field.</li>
+<li><strong>Do not apply the cars.com fee fix here.</strong> On cars.com the $698 must come
+<em>out</em> of the price field; on Autotrader it must stay <em>in</em>.</li>
+<li><strong>Investigate the stale $38,073 listing</strong> as a separate feed-freshness issue.</li>
+</ol>
+
+<div class="urgent"><strong>Time sensitivity.</strong> The Tiguan Customer Bonus runs
+<strong>1 July – 31 August 2026</strong>. Combined with the cars.com channel, the same 128 units
+are being advertised above their real price on both major third-party marketplaces
+simultaneously, inside the window the factory funded the bonus to move them.</div>
+
+<h2 class="pagebreak">Appendix — all 136 matched units</h2>
+
+<p style="font-size:13px;color:var(--ink2)">Comparable = (MSRP − Discount − bonus) + $698,
+retaining the dealer fee per Autotrader's fee-inclusive convention. Gap = Autotrader price −
+comparable, which equals the suppressed bonus. VINs and stock numbers come from our own site;
+Autotrader publishes neither.</p>
+
+<div class="appx">
+<table>
+<thead><tr><th>#</th><th>VIN (our site)</th><th>Stock</th><th>Model / trim</th>
+<th class="num">Autotrader</th><th class="num">Our MSRP</th><th class="num">Disc.</th>
+<th class="num">Advertised</th><th>Bonus</th><th class="num">Comparable</th>
+<th class="num">Gap</th></tr></thead>
+<tbody>
+<tr><td class=n>1</td><td class=vin>1V2BN2CA1TC535480</td><td>W19396</td><td>Atlas 2.0T SEL With Navigation &amp; AWD</td><td class=num>$51,349</td><td class=num>$53,251</td><td class=num>$2,600</td><td class=num>$51,349</td><td class=bon>$3,500</td><td class=num>$47,849</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>2</td><td class=vin>1V2BN2CA1TC535480</td><td>W19396</td><td>Atlas 2.0T SEL With Navigation &amp; AWD</td><td class=num>$51,349</td><td class=num>$53,251</td><td class=num>$2,600</td><td class=num>$51,349</td><td class=bon>$3,500</td><td class=num>$47,849</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>3</td><td class=vin>1V2BN2CA2TC550490</td><td>W19370</td><td>Atlas 2.0T SEL With Navigation &amp; AWD</td><td class=num>$51,150</td><td class=num>$53,052</td><td class=num>$2,600</td><td class=num>$51,150</td><td class=bon>$3,500</td><td class=num>$47,650</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>4</td><td class=vin>1V2BN2CA6TC539279</td><td>W19342</td><td>Atlas 2.0T SEL With Navigation &amp; AWD</td><td class=num>$50,224</td><td class=num>$52,126</td><td class=num>$2,600</td><td class=num>$50,224</td><td class=bon>$3,500</td><td class=num>$46,724</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>5</td><td class=vin>1V2BN2CA9TC571367</td><td>W19424</td><td>Atlas 2.0T SEL With Navigation &amp; AWD</td><td class=num>$51,589</td><td class=num>$53,491</td><td class=num>$2,600</td><td class=num>$51,589</td><td class=bon>$3,500</td><td class=num>$48,089</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>6</td><td class=vin>1V2CN2CA2TC503447</td><td>WT4147</td><td>Atlas 2.0T Peak Edition AWD</td><td class=num>$51,701</td><td class=num>$51,003</td><td class=num>—</td><td class=num>$51,701</td><td class=bon>$3,500</td><td class=num>$48,201</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>7</td><td class=vin>1V2CN2CA3TC582904</td><td>W19465</td><td>Atlas 2.0T Peak Edition AWD</td><td class=num>$52,633</td><td class=num>$51,935</td><td class=num>—</td><td class=num>$52,633</td><td class=bon>$3,500</td><td class=num>$49,133</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>8</td><td class=vin>1V2CN2CA4TC568672</td><td>W19411</td><td>Atlas 2.0T Peak Edition AWD</td><td class=num>$50,033</td><td class=num>$51,935</td><td class=num>$2,600</td><td class=num>$50,033</td><td class=bon>$3,500</td><td class=num>$46,533</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>9</td><td class=vin>1V2CN2CA5TC571189</td><td>W19426</td><td>Atlas 2.0T Peak Edition AWD</td><td class=num>$49,338</td><td class=num>$51,240</td><td class=num>$2,600</td><td class=num>$49,338</td><td class=bon>$3,500</td><td class=num>$45,838</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>10</td><td class=vin>1V2CN2CA5TC571189</td><td>W19426</td><td>Atlas 2.0T Peak Edition AWD</td><td class=num>$49,338</td><td class=num>$51,240</td><td class=num>$2,600</td><td class=num>$49,338</td><td class=bon>$3,500</td><td class=num>$45,838</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>11</td><td class=vin>1V2CN2CAXTC573696</td><td>W19428</td><td>Atlas 2.0T Peak Edition AWD</td><td class=num>$48,883</td><td class=num>$50,785</td><td class=num>$2,600</td><td class=num>$48,883</td><td class=bon>$3,500</td><td class=num>$45,383</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>12</td><td class=vin>1V2CN2CAXTC573696</td><td>W19428</td><td>Atlas 2.0T Peak Edition AWD</td><td class=num>$48,883</td><td class=num>$50,785</td><td class=num>$2,600</td><td class=num>$48,883</td><td class=bon>$3,500</td><td class=num>$45,383</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>13</td><td class=vin>1V2DN2CA3TC592983</td><td>W19505</td><td>Atlas 2.0T SE</td><td class=num>$42,302</td><td class=num>$41,604</td><td class=num>—</td><td class=num>$42,302</td><td class=bon>$3,500</td><td class=num>$38,802</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>14</td><td class=vin>1V2DN2CA6TC585798</td><td>W19479</td><td>Atlas 2.0T SE</td><td class=num>$42,413</td><td class=num>$41,715</td><td class=num>—</td><td class=num>$42,413</td><td class=bon>$3,500</td><td class=num>$38,913</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>15</td><td class=vin>1V2DN2CA6TC589611</td><td>W19497</td><td>Atlas 2.0T SE</td><td class=num>$42,302</td><td class=num>$41,604</td><td class=num>—</td><td class=num>$42,302</td><td class=bon>$3,500</td><td class=num>$38,802</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>16</td><td class=vin>1V2DN2CA6TC589933</td><td>W19502</td><td>Atlas 2.0T SE</td><td class=num>$42,302</td><td class=num>$41,604</td><td class=num>—</td><td class=num>$42,302</td><td class=bon>$3,500</td><td class=num>$38,802</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>17</td><td class=vin>1V2DN2CA8TC590548</td><td>W19506</td><td>Atlas 2.0T SE</td><td class=num>$42,757</td><td class=num>$42,059</td><td class=num>—</td><td class=num>$42,757</td><td class=bon>$3,500</td><td class=num>$39,257</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>18</td><td class=vin>1V2DN2CA8TC592459</td><td>W19507</td><td>Atlas 2.0T SE</td><td class=num>$42,757</td><td class=num>$42,059</td><td class=num>—</td><td class=num>$42,757</td><td class=bon>$3,500</td><td class=num>$39,257</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>19</td><td class=vin>1V2DN2CA9TC591191</td><td>W19508</td><td>Atlas 2.0T SE</td><td class=num>$42,757</td><td class=num>$42,059</td><td class=num>—</td><td class=num>$42,757</td><td class=bon>$3,500</td><td class=num>$39,257</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>20</td><td class=vin>1V2FN2CA0TC537657</td><td>W19368</td><td>Atlas 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$57,122</td><td class=num>$59,024</td><td class=num>$2,600</td><td class=num>$57,122</td><td class=bon>$3,500</td><td class=num>$53,622</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>21</td><td class=vin>1V2FN2CA0TC580234</td><td>W19458</td><td>Atlas 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$59,027</td><td class=num>$58,329</td><td class=num>—</td><td class=num>$59,027</td><td class=bon>$3,500</td><td class=num>$55,527</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>22</td><td class=vin>1V2FN2CA1TC575740</td><td>W19445</td><td>Atlas 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$55,904</td><td class=num>$57,806</td><td class=num>$2,600</td><td class=num>$55,904</td><td class=bon>$3,500</td><td class=num>$52,404</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>23</td><td class=vin>1V2FN2CA2TC545114</td><td>W19369</td><td>Atlas 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$56,667</td><td class=num>$58,569</td><td class=num>$2,600</td><td class=num>$56,667</td><td class=bon>$3,500</td><td class=num>$53,167</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>24</td><td class=vin>1V2FN2CA4TC580639</td><td>W19459</td><td>Atlas 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$59,027</td><td class=num>$58,329</td><td class=num>—</td><td class=num>$59,027</td><td class=bon>$3,500</td><td class=num>$55,527</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>25</td><td class=vin>1V2FN2CAXTC582041</td><td>W19461</td><td>Atlas 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$58,728</td><td class=num>$58,030</td><td class=num>—</td><td class=num>$58,728</td><td class=bon>$3,500</td><td class=num>$55,228</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>26</td><td class=vin>1V2HN2CA9TC577633</td><td>W19446</td><td>Atlas 2.0T SE w/Technology AWD</td><td class=num>$47,980</td><td class=num>$49,882</td><td class=num>$2,600</td><td class=num>$47,980</td><td class=bon>$3,500</td><td class=num>$44,480</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>27</td><td class=vin>1V2JN2CA0TC587842</td><td>W19485</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$48,987</td><td class=num>$48,289</td><td class=num>—</td><td class=num>$48,987</td><td class=bon>$3,500</td><td class=num>$45,487</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>28</td><td class=vin>1V2JN2CA1TC588093</td><td>W19481</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$47,937</td><td class=num>$47,239</td><td class=num>—</td><td class=num>$47,937</td><td class=bon>$3,500</td><td class=num>$44,437</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>29</td><td class=vin>1V2JN2CA4TC545500</td><td>W19360</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$46,176</td><td class=num>$48,078</td><td class=num>$2,600</td><td class=num>$46,176</td><td class=bon>$3,500</td><td class=num>$42,676</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>30</td><td class=vin>1V2JN2CA6TC587666</td><td>W19480</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$49,682</td><td class=num>$48,984</td><td class=num>—</td><td class=num>$49,682</td><td class=bon>$3,500</td><td class=num>$46,182</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>31</td><td class=vin>1V2JN2CA6TC591944</td><td>W19504</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$49,682</td><td class=num>$48,984</td><td class=num>—</td><td class=num>$49,682</td><td class=bon>$3,500</td><td class=num>$46,182</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>32</td><td class=vin>1V2JN2CA6TC592415</td><td>W19509</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$48,632</td><td class=num>$47,934</td><td class=num>—</td><td class=num>$48,632</td><td class=bon>$3,500</td><td class=num>$45,132</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>33</td><td class=vin>1V2JN2CA7TC542624</td><td>W19359</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$47,326</td><td class=num>$49,228</td><td class=num>$2,600</td><td class=num>$47,326</td><td class=bon>$3,500</td><td class=num>$43,826</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>34</td><td class=vin>1V2JN2CA7TC586042</td><td>WT4155</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$48,682</td><td class=num>$47,984</td><td class=num>—</td><td class=num>$48,682</td><td class=bon>$3,500</td><td class=num>$45,182</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>35</td><td class=vin>1V2JN2CA7TC591922</td><td>W19503</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$48,532</td><td class=num>$47,834</td><td class=num>—</td><td class=num>$48,532</td><td class=bon>$3,500</td><td class=num>$45,032</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>36</td><td class=vin>1V2JN2CA8TC587006</td><td>W19476</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$47,937</td><td class=num>$47,239</td><td class=num>—</td><td class=num>$47,937</td><td class=bon>$3,500</td><td class=num>$44,437</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>37</td><td class=vin>1V2JN2CA9TC575723</td><td>W19433</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$45,932</td><td class=num>$47,834</td><td class=num>$2,600</td><td class=num>$45,932</td><td class=bon>$3,500</td><td class=num>$42,432</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>38</td><td class=vin>1V2JN2CA9TC587922</td><td>W19487</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$47,937</td><td class=num>$47,239</td><td class=num>—</td><td class=num>$47,937</td><td class=bon>$3,500</td><td class=num>$44,437</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>39</td><td class=vin>1V2JN2CA9TC589623</td><td>W19486</td><td>Atlas 2.0T SE w/Technology</td><td class=num>$49,227</td><td class=num>$48,529</td><td class=num>—</td><td class=num>$49,227</td><td class=bon>$3,500</td><td class=num>$45,727</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>40</td><td class=vin>1V2KN2CA2TC568875</td><td>W19419</td><td>Atlas 2.0T SE w/Technology AWD</td><td class=num>$47,435</td><td class=num>$49,337</td><td class=num>$2,600</td><td class=num>$47,435</td><td class=bon>$3,500</td><td class=num>$43,935</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>41</td><td class=vin>1V2KN2CA5TC567994</td><td>W19410</td><td>Atlas 2.0T SE w/Technology AWD</td><td class=num>$48,485</td><td class=num>$50,387</td><td class=num>$2,600</td><td class=num>$48,485</td><td class=bon>$3,500</td><td class=num>$44,985</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>42</td><td class=vin>1V2LN2CA4TC582782</td><td>W19478</td><td>Atlas 2.0T SE AWD</td><td class=num>$44,202</td><td class=num>$43,504</td><td class=num>—</td><td class=num>$44,202</td><td class=bon>$3,500</td><td class=num>$40,702</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>43</td><td class=vin>3VVCR7RM0TM133183</td><td>W19528</td><td>Tiguan 2.0T S</td><td class=num>$33,622</td><td class=num>$32,924</td><td class=num>—</td><td class=num>$33,622</td><td class=bon>$2,500</td><td class=num>$31,122</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>44</td><td class=vin>3VVCR7RM5TM142798</td><td>W19529</td><td>Tiguan 2.0T S</td><td class=num>$33,622</td><td class=num>$32,924</td><td class=num>—</td><td class=num>$33,622</td><td class=bon>$2,500</td><td class=num>$31,122</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>45</td><td class=vin>3VVCR7RM7TM142124</td><td>W19521</td><td>Tiguan 2.0T S</td><td class=num>$33,622</td><td class=num>$32,924</td><td class=num>—</td><td class=num>$33,622</td><td class=bon>$2,500</td><td class=num>$31,122</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>46</td><td class=vin>3VVFR7RM5TM136013</td><td>W19526</td><td>Tiguan 2.0T SE</td><td class=num>$36,422</td><td class=num>$35,724</td><td class=num>—</td><td class=num>$36,422</td><td class=bon>$2,500</td><td class=num>$33,922</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>47</td><td class=vin>3VVGR7RM2TM139861</td><td>W19520</td><td>Tiguan 2.0T SE R-Line Black AWD</td><td class=num>$42,223</td><td class=num>$41,525</td><td class=num>—</td><td class=num>$42,223</td><td class=bon>$2,500</td><td class=num>$39,723</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>48</td><td class=vin>3VVHR7RM0TM083679</td><td>W19378</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$38,042</td><td class=num>$39,994</td><td class=num>$2,650</td><td class=num>$38,042</td><td class=bon>$2,500</td><td class=num>$35,542</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>49</td><td class=vin>3VVHR7RM0TM132086</td><td>W19519</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$41,573</td><td class=num>$40,875</td><td class=num>—</td><td class=num>$41,573</td><td class=bon>$2,500</td><td class=num>$39,073</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>50</td><td class=vin>3VVHR7RM1TM105821</td><td>W19454</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$38,394</td><td class=num>$40,346</td><td class=num>$2,650</td><td class=num>$38,394</td><td class=bon>$2,500</td><td class=num>$35,894</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>51</td><td class=vin>3VVHR7RM1TM130413</td><td>W19527</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$41,573</td><td class=num>$40,875</td><td class=num>—</td><td class=num>$41,573</td><td class=bon>$2,500</td><td class=num>$39,073</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>52</td><td class=vin>3VVHR7RM1TM131920</td><td>W19493</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$41,573</td><td class=num>$40,875</td><td class=num>—</td><td class=num>$41,573</td><td class=bon>$2,500</td><td class=num>$39,073</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>53</td><td class=vin>3VVHR7RM4TM076184</td><td>W19364</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$37,544</td><td class=num>$39,496</td><td class=num>$2,650</td><td class=num>$37,544</td><td class=bon>$2,500</td><td class=num>$35,044</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>54</td><td class=vin>3VVHR7RM4TM111256</td><td>W19450</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$38,528</td><td class=num>$40,480</td><td class=num>$2,650</td><td class=num>$38,528</td><td class=bon>$2,500</td><td class=num>$36,028</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>55</td><td class=vin>3VVHR7RM4TM111256</td><td>W19450</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$38,528</td><td class=num>$40,480</td><td class=num>$2,650</td><td class=num>$38,528</td><td class=bon>$2,500</td><td class=num>$36,028</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>56</td><td class=vin>3VVHR7RM4TM124122</td><td>W19464</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$41,573</td><td class=num>$40,875</td><td class=num>—</td><td class=num>$41,573</td><td class=bon>$2,500</td><td class=num>$39,073</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>57</td><td class=vin>3VVHR7RM5TM084987</td><td>W19381</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$37,587</td><td class=num>$39,539</td><td class=num>$2,650</td><td class=num>$37,587</td><td class=bon>$2,500</td><td class=num>$35,087</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>58</td><td class=vin>3VVHR7RM5TM084987</td><td>W19381</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$37,587</td><td class=num>$39,539</td><td class=num>$2,650</td><td class=num>$37,587</td><td class=bon>$2,500</td><td class=num>$35,087</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>59</td><td class=vin>3VVHR7RM5TM084987</td><td>W19381</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$37,587</td><td class=num>$39,539</td><td class=num>$2,650</td><td class=num>$37,587</td><td class=bon>$2,500</td><td class=num>$35,087</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>60</td><td class=vin>3VVHR7RM5TM118426</td><td>W19468</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$40,723</td><td class=num>$40,025</td><td class=num>—</td><td class=num>$40,723</td><td class=bon>$2,500</td><td class=num>$38,223</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>61</td><td class=vin>3VVHR7RM5TM130396</td><td>W19491</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$41,118</td><td class=num>$40,420</td><td class=num>—</td><td class=num>$41,118</td><td class=bon>$2,500</td><td class=num>$38,618</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>62</td><td class=vin>3VVHR7RM5TM131614</td><td>W19510</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$41,573</td><td class=num>$40,875</td><td class=num>—</td><td class=num>$41,573</td><td class=bon>$2,500</td><td class=num>$39,073</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>63</td><td class=vin>3VVHR7RM8TM133969</td><td>W19501</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$40,723</td><td class=num>$40,025</td><td class=num>—</td><td class=num>$40,723</td><td class=bon>$2,500</td><td class=num>$38,223</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>64</td><td class=vin>3VVHR7RM9TM120373</td><td>W19469</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$41,573</td><td class=num>$40,875</td><td class=num>—</td><td class=num>$41,573</td><td class=bon>$2,500</td><td class=num>$39,073</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>65</td><td class=vin>3VVHR7RM9TM125587</td><td>W19467</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$40,723</td><td class=num>$40,025</td><td class=num>—</td><td class=num>$40,723</td><td class=bon>$2,500</td><td class=num>$38,223</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>66</td><td class=vin>3VVHR7RM9TM130434</td><td>W19516</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$41,118</td><td class=num>$40,420</td><td class=num>—</td><td class=num>$41,118</td><td class=bon>$2,500</td><td class=num>$38,618</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>67</td><td class=vin>3VVHR7RM9TM130840</td><td>W19494</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$41,118</td><td class=num>$40,420</td><td class=num>—</td><td class=num>$41,118</td><td class=bon>$2,500</td><td class=num>$38,618</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>68</td><td class=vin>3VVHR7RM9TM132099</td><td>W19522</td><td>Tiguan 2.0T SE R-Line Black</td><td class=num>$40,723</td><td class=num>$40,025</td><td class=num>—</td><td class=num>$40,723</td><td class=bon>$2,500</td><td class=num>$38,223</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>69</td><td class=vin>3VVMR7RM8TM084142</td><td>W19456</td><td>Tiguan 2.0T SE AWD</td><td class=num>$36,133</td><td class=num>$38,085</td><td class=num>$2,650</td><td class=num>$36,133</td><td class=bon>$2,500</td><td class=num>$33,633</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>70</td><td class=vin>3VVMR7RM8TM084142</td><td>W19456</td><td>Tiguan 2.0T SE AWD</td><td class=num>$36,133</td><td class=num>$38,085</td><td class=num>$2,650</td><td class=num>$36,133</td><td class=bon>$2,500</td><td class=num>$33,633</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>71</td><td class=vin>3VVMR7RM8TM126096</td><td>W19515</td><td>Tiguan 2.0T SE AWD</td><td class=num>$39,122</td><td class=num>$38,424</td><td class=num>—</td><td class=num>$39,122</td><td class=bon>$2,500</td><td class=num>$36,622</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>72</td><td class=vin>3VVNR7RM0TM116103</td><td>W19474</td><td>Tiguan 2.0T SE</td><td class=num>$38,145</td><td class=num>$37,447</td><td class=num>—</td><td class=num>$38,145</td><td class=bon>$2,500</td><td class=num>$35,645</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>73</td><td class=vin>3VVNR7RM1TM110925</td><td>W19448</td><td>Tiguan 2.0T SE</td><td class=num>$35,040</td><td class=num>$36,992</td><td class=num>$2,650</td><td class=num>$35,040</td><td class=bon>$2,500</td><td class=num>$32,540</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>74</td><td class=vin>3VVNR7RM1TM110925</td><td>W19448</td><td>Tiguan 2.0T SE</td><td class=num>$35,040</td><td class=num>$36,992</td><td class=num>$2,650</td><td class=num>$35,040</td><td class=bon>$2,500</td><td class=num>$32,540</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>75</td><td class=vin>3VVNR7RM4TM108876</td><td>W19441</td><td>Tiguan 2.0T SE</td><td class=num>$34,972</td><td class=num>$36,924</td><td class=num>$2,650</td><td class=num>$34,972</td><td class=bon>$2,500</td><td class=num>$32,472</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>76</td><td class=vin>3VVNR7RM7TM135697</td><td>W19500</td><td>Tiguan 2.0T SE</td><td class=num>$37,622</td><td class=num>$36,924</td><td class=num>—</td><td class=num>$37,622</td><td class=bon>$2,500</td><td class=num>$35,122</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>77</td><td class=vin>3VVNR7RM8TM081214</td><td>W19374</td><td>Tiguan 2.0T SE</td><td class=num>$34,929</td><td class=num>$36,881</td><td class=num>$2,650</td><td class=num>$34,929</td><td class=bon>$2,500</td><td class=num>$32,429</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>78</td><td class=vin>3VVNR7RM9TM136432</td><td>W19511</td><td>Tiguan 2.0T SE</td><td class=num>$37,622</td><td class=num>$36,924</td><td class=num>—</td><td class=num>$37,622</td><td class=bon>$2,500</td><td class=num>$35,122</td><td class='num dl'>$2,500</td></tr>
+<tr><td class=n>79</td><td class=vin>3VVUW7RM4TM140912</td><td>W19524</td><td>Tiguan 2.0T SEL R-Line Turbo With Navigation &amp; AWD</td><td class=num>$47,552</td><td class=num>$46,854</td><td class=num>—</td><td class=num>$47,552</td><td class=bon>—</td><td class=num>$47,552</td><td class='num dl'>—</td></tr>
+<tr><td class=n>80</td><td class=vin>3VVUW7RM6TM107880</td><td>W19452</td><td>Tiguan 2.0T SEL R-Line Turbo With Navigation &amp; AWD</td><td class=num>$46,007</td><td class=num>$46,459</td><td class=num>$1,150</td><td class=num>$46,007</td><td class=bon>—</td><td class=num>$46,007</td><td class='num dl'>—</td></tr>
+<tr><td class=n>81</td><td class=vin>3VVUW7RM6TM130334</td><td>W19483</td><td>Tiguan 2.0T SEL R-Line Turbo With Navigation &amp; AWD</td><td class=num>$46,702</td><td class=num>$46,004</td><td class=num>—</td><td class=num>$46,702</td><td class=bon>—</td><td class=num>$46,702</td><td class='num dl'>—</td></tr>
+<tr><td class=n>82</td><td class=vin>3VVUW7RM6TM130947</td><td>W19492</td><td>Tiguan 2.0T SEL R-Line Turbo With Navigation &amp; AWD</td><td class=num>$47,005</td><td class=num>$46,307</td><td class=num>—</td><td class=num>$47,005</td><td class=bon>—</td><td class=num>$47,005</td><td class='num dl'>—</td></tr>
+<tr><td class=n>83</td><td class=vin>3VVUW7RM7TM139219</td><td>W19514</td><td>Tiguan 2.0T SEL R-Line Turbo With Navigation &amp; AWD</td><td class=num>$46,702</td><td class=num>$46,004</td><td class=num>—</td><td class=num>$46,702</td><td class=bon>—</td><td class=num>$46,702</td><td class='num dl'>—</td></tr>
+<tr><td class=n>84</td><td class=vin>1V2AC2CA0TC231042</td><td>W19460</td><td>Atlas Cross Sport 2.0T SEL R-Line Black With Navigation &amp; AWD</td><td class=num>$54,782</td><td class=num>$54,084</td><td class=num>—</td><td class=num>$54,782</td><td class=bon>$3,500</td><td class=num>$51,282</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>85</td><td class=vin>1V2FC2CA1TC224770</td><td>W19393</td><td>Atlas Cross Sport 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$55,274</td><td class=num>$57,076</td><td class=num>$2,500</td><td class=num>$55,274</td><td class=bon>$3,500</td><td class=num>$51,774</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>86</td><td class=vin>1V2FC2CA1TC224770</td><td>W19393</td><td>Atlas Cross Sport 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$55,274</td><td class=num>$57,076</td><td class=num>$2,500</td><td class=num>$55,274</td><td class=bon>$3,500</td><td class=num>$51,774</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>87</td><td class=vin>1V2FC2CA5TC225596</td><td>W19409</td><td>Atlas Cross Sport 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$55,055</td><td class=num>$56,857</td><td class=num>$2,500</td><td class=num>$55,055</td><td class=bon>$3,500</td><td class=num>$51,555</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>88</td><td class=vin>1V2FC2CA6TC200691</td><td>WT4146</td><td>Atlas Cross Sport 2.0T SEL Premium R-Line With Navigation &amp; AWD</td><td class=num>$57,448</td><td class=num>$56,750</td><td class=num>—</td><td class=num>$57,448</td><td class=bon>$3,500</td><td class=num>$53,948</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>89</td><td class=vin>1V2KC2CA0TC228646</td><td>W19436</td><td>Atlas Cross Sport 2.0T SE w/Technology AWD</td><td class=num>$47,673</td><td class=num>$49,475</td><td class=num>$2,500</td><td class=num>$47,673</td><td class=bon>$3,500</td><td class=num>$44,173</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>90</td><td class=vin>1V2KC2CA1TC224301</td><td>W19388</td><td>Atlas Cross Sport 2.0T SE w/Technology AWD</td><td class=num>$46,756</td><td class=num>$48,558</td><td class=num>$2,500</td><td class=num>$46,756</td><td class=bon>$3,500</td><td class=num>$43,256</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>91</td><td class=vin>1V2KC2CA3TC228849</td><td>W19437</td><td>Atlas Cross Sport 2.0T SE w/Technology AWD</td><td class=num>$46,818</td><td class=num>$48,620</td><td class=num>$2,500</td><td class=num>$46,818</td><td class=bon>$3,500</td><td class=num>$43,318</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>92</td><td class=vin>1V2KC2CA9TC228306</td><td>W19435</td><td>Atlas Cross Sport 2.0T SE w/Technology AWD</td><td class=num>$47,849</td><td class=num>$49,651</td><td class=num>$2,500</td><td class=num>$47,849</td><td class=bon>$3,500</td><td class=num>$44,349</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>93</td><td class=vin>1V2LC2CA4TC224085</td><td>WT4145</td><td>Atlas Cross Sport 2.0T SE AWD</td><td class=num>$43,117</td><td class=num>$42,419</td><td class=num>—</td><td class=num>$43,117</td><td class=bon>$3,500</td><td class=num>$39,617</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>94</td><td class=vin>1V2WC2CA3TC233387</td><td>WT4150</td><td>Atlas Cross Sport 2.0T SE w/Technology</td><td class=num>$45,968</td><td class=num>$45,270</td><td class=num>—</td><td class=num>$45,968</td><td class=bon>$3,500</td><td class=num>$42,468</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>95</td><td class=vin>1V2WC2CA9TC232650</td><td>W19477</td><td>Atlas Cross Sport 2.0T SE w/Technology</td><td class=num>$46,455</td><td class=num>$45,757</td><td class=num>—</td><td class=num>$46,455</td><td class=bon>$3,500</td><td class=num>$42,955</td><td class='num dl'>$3,500</td></tr>
+<tr><td class=n>96</td><td class=vin>1V2CRPE82TC000853</td><td>W19288</td><td>ID.4 Pro With Navigation</td><td class=num>$43,770</td><td class=num>$47,072</td><td class=num>$4,000</td><td class=num>$43,770</td><td class=bon>$6,000</td><td class=num>$37,770</td><td class='num dl'>$6,000</td></tr>
+<tr><td class=n>97</td><td class=vin>1V2CRPE82TC000853</td><td>W19288</td><td>ID.4 Pro With Navigation</td><td class=num>$43,770</td><td class=num>$47,072</td><td class=num>$4,000</td><td class=num>$43,770</td><td class=bon>$6,000</td><td class=num>$37,770</td><td class='num dl'>$6,000</td></tr>
+<tr><td class=n>98</td><td class=vin>1V2CRPE86TC000855</td><td>W19294</td><td>ID.4 Pro With Navigation</td><td class=num>$44,225</td><td class=num>$47,527</td><td class=num>$4,000</td><td class=num>$44,225</td><td class=bon>$6,000</td><td class=num>$38,225</td><td class='num dl'>$6,000</td></tr>
+<tr><td class=n>99</td><td class=vin>1V2DSPE82TC001428</td><td>W19289</td><td>ID.4 Pro With Navigation &amp; AWD</td><td class=num>$47,670</td><td class=num>$50,972</td><td class=num>$4,000</td><td class=num>$47,670</td><td class=bon>$6,000</td><td class=num>$41,670</td><td class='num dl'>$6,000</td></tr>
+<tr><td class=n>100</td><td class=vin>1V2DSPE82TC001428</td><td>W19289</td><td>ID.4 Pro With Navigation &amp; AWD</td><td class=num>$47,670</td><td class=num>$50,972</td><td class=num>$4,000</td><td class=num>$47,670</td><td class=bon>$6,000</td><td class=num>$41,670</td><td class='num dl'>$6,000</td></tr>
+<tr><td class=n>101</td><td class=vin>1V2DSPE82TC001428</td><td>W19289</td><td>ID.4 Pro With Navigation &amp; AWD</td><td class=num>$47,670</td><td class=num>$50,972</td><td class=num>$4,000</td><td class=num>$47,670</td><td class=bon>$6,000</td><td class=num>$41,670</td><td class='num dl'>$6,000</td></tr>
+<tr><td class=n>102</td><td class=vin>1V2WSPE82TC001051</td><td>W19293</td><td>ID.4 Pro S With Navigation &amp; AWD</td><td class=num>$52,770</td><td class=num>$56,072</td><td class=num>$4,000</td><td class=num>$52,770</td><td class=bon>$6,000</td><td class=num>$46,770</td><td class='num dl'>$6,000</td></tr>
+<tr><td class=n>103</td><td class=vin>3VW5W7BUXTM049475</td><td>WT4149</td><td>Jetta 1.5T S</td><td class=num>$26,383</td><td class=num>$25,685</td><td class=num>—</td><td class=num>$26,383</td><td class=bon>$1,500</td><td class=num>$24,883</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>104</td><td class=vin>3VW7W7BU2TM065243</td><td>W19457</td><td>Jetta 1.5T SE</td><td class=num>$30,604</td><td class=num>$29,906</td><td class=num>—</td><td class=num>$30,604</td><td class=bon>$1,500</td><td class=num>$29,104</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>105</td><td class=vin>3VW7W7BU2TM067400</td><td>W19489</td><td>Jetta 1.5T SE</td><td class=num>$29,479</td><td class=num>$28,781</td><td class=num>—</td><td class=num>$29,479</td><td class=bon>$1,500</td><td class=num>$27,979</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>106</td><td class=vin>3VW7W7BU6TM075984</td><td>W19525</td><td>Jetta 1.5T SE</td><td class=num>$30,149</td><td class=num>$29,451</td><td class=num>—</td><td class=num>$30,149</td><td class=bon>$1,500</td><td class=num>$28,649</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>107</td><td class=vin>3VW7W7BU7TM023487</td><td>W19308</td><td>Jetta 1.5T SE</td><td class=num>$28,179</td><td class=num>$29,731</td><td class=num>$2,250</td><td class=num>$28,179</td><td class=bon>$1,500</td><td class=num>$26,679</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>108</td><td class=vin>3VW7W7BU9TM033129</td><td>W19350</td><td>Jetta 1.5T SE</td><td class=num>$27,404</td><td class=num>$28,956</td><td class=num>$2,250</td><td class=num>$27,404</td><td class=bon>$1,500</td><td class=num>$25,904</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>109</td><td class=vin>3VW7W7BU9TM076692</td><td>W19523</td><td>Jetta 1.5T SE</td><td class=num>$30,109</td><td class=num>$29,411</td><td class=num>—</td><td class=num>$30,109</td><td class=bon>$1,500</td><td class=num>$28,609</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>110</td><td class=vin>3VWBW7BU8TM066343</td><td>W19484</td><td>Jetta 1.5T Sport</td><td class=num>$27,799</td><td class=num>$27,101</td><td class=num>—</td><td class=num>$27,799</td><td class=bon>$1,500</td><td class=num>$26,299</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>111</td><td class=vin>3VWBW7BU9TM073639</td><td>W19498</td><td>Jetta 1.5T Sport</td><td class=num>$28,254</td><td class=num>$27,556</td><td class=num>—</td><td class=num>$28,254</td><td class=bon>$1,500</td><td class=num>$26,754</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>112</td><td class=vin>3VWGW7BU0TM064298</td><td>W19473</td><td>Jetta 1.5T SEL With Navigation</td><td class=num>$32,489</td><td class=num>$31,791</td><td class=num>—</td><td class=num>$32,489</td><td class=bon>$1,500</td><td class=num>$30,989</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>113</td><td class=vin>3VWGW7BU0TM064818</td><td>W19482</td><td>Jetta 1.5T SEL With Navigation</td><td class=num>$32,489</td><td class=num>$31,791</td><td class=num>—</td><td class=num>$32,489</td><td class=bon>$1,500</td><td class=num>$30,989</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>114</td><td class=vin>3VV3C7B21TM088362</td><td>W19512</td><td>Taos 1.5T SE Black</td><td class=num>$35,013</td><td class=num>$34,315</td><td class=num>—</td><td class=num>$35,013</td><td class=bon>$1,500</td><td class=num>$33,513</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>115</td><td class=vin>3VV5C7B25TM069368</td><td>W19463</td><td>Taos 1.5T S</td><td class=num>$29,274</td><td class=num>$28,576</td><td class=num>—</td><td class=num>$29,274</td><td class=bon>$1,500</td><td class=num>$27,774</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>116</td><td class=vin>3VV5C7B2XTM019727</td><td>W19309</td><td>Taos 1.5T S</td><td class=num>$27,674</td><td class=num>$28,576</td><td class=num>$1,600</td><td class=num>$27,674</td><td class=bon>$1,500</td><td class=num>$26,174</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>117</td><td class=vin>3VV5C7B2XTM019727</td><td>W19309</td><td>Taos 1.5T S</td><td class=num>$27,674</td><td class=num>$28,576</td><td class=num>$1,600</td><td class=num>$27,674</td><td class=bon>$1,500</td><td class=num>$26,174</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>118</td><td class=vin>3VVSC7B22TM013309</td><td>W19266</td><td>Taos 1.5T SE</td><td class=num>$31,558</td><td class=num>$32,460</td><td class=num>$1,600</td><td class=num>$31,558</td><td class=bon>$1,500</td><td class=num>$30,058</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>119</td><td class=vin>3VVSC7B24TM091221</td><td>W19517</td><td>Taos 1.5T SE</td><td class=num>$33,158</td><td class=num>$32,460</td><td class=num>—</td><td class=num>$33,158</td><td class=bon>$1,500</td><td class=num>$31,658</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>120</td><td class=vin>3VVSC7B26TM044238</td><td>W19362</td><td>Taos 1.5T SE</td><td class=num>$30,889</td><td class=num>$31,791</td><td class=num>$1,600</td><td class=num>$30,889</td><td class=bon>$1,500</td><td class=num>$29,389</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>121</td><td class=vin>3VVSC7B27TM058357</td><td>W19389</td><td>Taos 1.5T SE</td><td class=num>$31,060</td><td class=num>$31,962</td><td class=num>$1,600</td><td class=num>$31,060</td><td class=bon>$1,500</td><td class=num>$29,560</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>122</td><td class=vin>3VVSC7B29TM061230</td><td>W19403</td><td>Taos 1.5T SE</td><td class=num>$31,515</td><td class=num>$32,417</td><td class=num>$1,600</td><td class=num>$31,515</td><td class=bon>$1,500</td><td class=num>$30,015</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>123</td><td class=vin>3VVSC7B2XTM056182</td><td>W19382</td><td>Taos 1.5T SE</td><td class=num>$30,665</td><td class=num>$31,567</td><td class=num>$1,600</td><td class=num>$30,665</td><td class=bon>$1,500</td><td class=num>$29,165</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>124</td><td class=vin>WVW3E7CD6TW201232</td><td>W19356</td><td>Golf GTI 2.0T SE With Navigation</td><td class=num>$41,891</td><td class=num>$42,793</td><td class=num>$1,600</td><td class=num>$41,891</td><td class=bon>$1,500</td><td class=num>$40,391</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>125</td><td class=vin>WVWLE7CD3TW259492</td><td>W19513</td><td>Golf GTI 2.0T S With Navigation</td><td class=num>$37,576</td><td class=num>$36,878</td><td class=num>—</td><td class=num>$37,576</td><td class=bon>$1,500</td><td class=num>$36,076</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>126</td><td class=vin>WVWSE7CDXTW229398</td><td>W19405</td><td>Golf GTI 2.0T SE With Navigation</td><td class=num>$41,342</td><td class=num>$42,244</td><td class=num>$1,600</td><td class=num>$41,342</td><td class=bon>$1,500</td><td class=num>$39,842</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>127</td><td class=vin>WVWVE7CD3TW233936</td><td>W19412</td><td>Golf GTI Autobahn With Navigation</td><td class=num>$44,041</td><td class=num>$44,943</td><td class=num>$1,600</td><td class=num>$44,041</td><td class=bon>$1,500</td><td class=num>$42,541</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>128</td><td class=vin>WVWVE7CD5TW269904</td><td>W19518</td><td>Golf GTI Autobahn With Navigation</td><td class=num>$46,046</td><td class=num>$45,348</td><td class=num>—</td><td class=num>$46,046</td><td class=bon>$1,500</td><td class=num>$44,546</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>129</td><td class=vin>WVWVE7CDXTW158667</td><td>W19327</td><td>Golf GTI Autobahn With Navigation</td><td class=num>$44,137</td><td class=num>$45,189</td><td class=num>$1,750</td><td class=num>$44,137</td><td class=bon>$1,500</td><td class=num>$42,637</td><td class='num dl'>$1,500</td></tr>
+<tr><td class=n>130</td><td class=vin>3VW1M7BU0TM049814</td><td>W19392</td><td>Jetta GLI 2.0T Autobahn</td><td class=num>$35,567</td><td class=num>$36,895</td><td class=num>$2,026</td><td class=num>$35,567</td><td class=bon>$1,750</td><td class=num>$33,817</td><td class='num dl'>$1,750</td></tr>
+<tr><td class=n>131</td><td class=vin>3VW1M7BU2TM025398</td><td>W19340</td><td>Jetta GLI 2.0T Autobahn</td><td class=num>$35,868</td><td class=num>$37,196</td><td class=num>$2,026</td><td class=num>$35,868</td><td class=bon>$1,750</td><td class=num>$34,118</td><td class='num dl'>$1,750</td></tr>
+<tr><td class=n>132</td><td class=vin>3VW1M7BU6TM052717</td><td>W19404</td><td>Jetta GLI 2.0T Autobahn</td><td class=num>$35,762</td><td class=num>$37,090</td><td class=num>$2,026</td><td class=num>$35,762</td><td class=bon>$1,750</td><td class=num>$34,012</td><td class='num dl'>$1,750</td></tr>
+<tr><td class=n>133</td><td class=vin>3VW2M7BU9TM063490</td><td>W19472</td><td>Jetta GLI 2.0T Autobahn</td><td class=num>$37,894</td><td class=num>$37,196</td><td class=num>—</td><td class=num>$37,894</td><td class=bon>$1,750</td><td class=num>$36,144</td><td class='num dl'>$1,750</td></tr>
+<tr><td class=n>134</td><td class=vin>WVWEF7CD0TW212703</td><td>W19390</td><td>Golf R 2.0T With Navigation &amp; AWD</td><td class=num>$57,142</td><td class=num>$56,444</td><td class=num>—</td><td class=num>$57,142</td><td class=bon>—</td><td class=num>$57,142</td><td class='num dl'>—</td></tr>
+<tr><td class=n>135</td><td class=vin>WVWEF7CD9TW217592</td><td>W19391</td><td>Golf R 2.0T With Navigation &amp; AWD</td><td class=num>$57,142</td><td class=num>$56,444</td><td class=num>—</td><td class=num>$57,142</td><td class=bon>—</td><td class=num>$57,142</td><td class='num dl'>—</td></tr>
+<tr><td class=n>136</td><td class=vin>WVWJF7CD1TW249533</td><td>W19475</td><td>Golf R 2.0T With Navigation &amp; AWD</td><td class=num>$52,862</td><td class=num>$52,164</td><td class=num>—</td><td class=num>$52,862</td><td class=bon>—</td><td class=num>$52,862</td><td class='num dl'>—</td></tr>
+</tbody>
+<tfoot><tr><td colspan="10">Total bonus hidden across 136 units</td>
+<td class="num dl">$368,500</td></tr></tfoot>
+</table>
+</div>
+
+<footer>Volkswagen North Scottsdale (Penske #182) · Autotrader syndication gap audit ·
+Data captured live 27 July 2026 · Full methodology in
+<code>audits/2026-07-27-vwns-autotrader-syndication-audit.md</code> · Companion cars.com audit in
+<code>audits/2026-07-27-vwns-carscom-syndication-audit.md</code></footer>
+
+</div></body></html>
