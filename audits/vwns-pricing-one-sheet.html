@@ -1,0 +1,205 @@
+<meta charset="utf-8">
+<title>VW North Scottsdale — Advertised Pricing Issue</title>
+<style>
+:root{
+  --ink:#0b0b0b; --ink2:#3d3c3a; --muted:#6f6e6a; --line:#d8d7d0;
+  --blue:#2a78d6; --red:#c0392f; --green:#0a7a2f; --wash:#eef4fd; --warm:#fdf3ec;
+  --page:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#f2f2ef;color:var(--ink);
+  font:13px/1.42 system-ui,-apple-system,"Segoe UI",sans-serif;}
+.sheet{width:8.5in;min-height:11in;margin:16px auto;background:var(--page);
+  padding:0.36in 0.5in 0.28in;}
+h1{font-size:21px;line-height:1.14;margin:0 0 4px;letter-spacing:-.022em}
+.eyebrow{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);
+  font-weight:700;margin:0 0 6px}
+.sub{font-size:11.5px;color:var(--muted);margin:0}
+.hr{height:2.5px;background:var(--ink);margin:7px 0 9px}
+h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  font-weight:700;margin:0 0 6px}
+section{margin-bottom:8px}
+p{margin:0 0 6px}
+.lead{font-size:13px;line-height:1.4;color:var(--ink2)}
+.lead b{color:var(--ink)}
+.cols{display:grid;grid-template-columns:1.06fr .94fr;gap:13px}
+
+/* example block */
+.ex{border:1.5px solid var(--line);border-radius:7px;padding:8px 10px 7px}
+.ex .car{font-weight:700;font-size:12.5px;margin-bottom:6px}
+.row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:3px 0;border-bottom:1px solid #ececE6;font-size:12px}
+.row:last-of-type{border-bottom:0}
+.row .v{font-weight:700;font-variant-numeric:tabular-nums;font-size:13.5px}
+.row.hi{background:var(--warm);margin:3px -11px 0;padding:6px 11px;border:0}
+.row.hi .v{color:var(--red);font-size:15.5px}
+.row.hi span:first-child{font-weight:700}
+.note{font-size:10.5px;color:var(--muted);margin-top:5px}
+
+/* scale numbers */
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:7px}
+.num{border:1.5px solid var(--line);border-radius:7px;padding:8px 10px}
+.num .v{font-size:20px;font-weight:800;letter-spacing:-.02em;line-height:1.05;color:var(--red)}
+.num .k{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.3}
+
+/* rank */
+.rank{margin-top:3px}
+.rk{display:grid;grid-template-columns:124px 1fr;gap:9px;align-items:center;
+  padding:3.5px 0;border-bottom:1px solid #ececE6;font-size:11.5px}
+.rk:last-child{border-bottom:0}
+.rk .m{font-weight:700}
+.badge{display:inline-block;padding:1.5px 7px;border-radius:4px;font-weight:800;
+  font-size:11px;font-variant-numeric:tabular-nums}
+.b-bad{background:#f7e4e2;color:var(--red)}
+.b-good{background:#e2f2e6;color:var(--green)}
+.arrow{color:var(--muted);margin:0 5px;font-size:11px}
+.rk .why{font-size:10.5px;color:var(--muted)}
+
+/* not asking */
+.nak{background:var(--wash);border-radius:7px;padding:8px 10px}
+.nak ul{margin:4px 0 0;padding-left:16px}
+.nak li{margin:2.5px 0;font-size:11.5px}
+.nak li b{color:var(--ink)}
+
+/* fix */
+.fix{border-left:3px solid var(--blue);background:#fafafa;padding:7px 10px;border-radius:0 6px 6px 0}
+.fix ol{margin:4px 0 0;padding-left:16px}
+.fix li{margin:3px 0;font-size:11.5px}
+
+/* objections */
+table.obj{border-collapse:collapse;width:100%;font-size:11px;margin-top:2px}
+.obj td{padding:3.2px 7px;border-bottom:1px solid #ececE6;vertical-align:top}
+.obj tr:last-child td{border-bottom:0}
+.obj td:first-child{width:41%;color:var(--ink2);font-style:italic}
+.obj td:last-child{font-weight:600}
+
+.deadline{background:var(--red);color:#fff;border-radius:7px;padding:8px 12px;
+  display:flex;justify-content:space-between;align-items:center;gap:12px}
+.deadline .t{font-size:12.5px;font-weight:700;line-height:1.3}
+.deadline .d{font-size:11px;opacity:.92;margin-top:2px}
+.ask{font-size:12.5px;font-weight:700}
+footer{margin-top:8px;padding-top:6px;border-top:1px solid var(--line);
+  font-size:9.5px;color:var(--muted);line-height:1.35}
+
+@media print{
+  @page{size:letter;margin:0}
+  body{background:#fff}
+  .sheet{width:auto;min-height:0;margin:0;padding:0.34in 0.5in 0.2in}
+}
+</style>
+
+<div class="sheet">
+
+  <p class="eyebrow">Volkswagen North Scottsdale · Penske #182 · One page</p>
+  <h1>We are advertising every new car for more<br>than the price we actually sell it for.</h1>
+  <p class="sub">Autotrader and cars.com · Every price below was read off the live sites on 27 July 2026</p>
+  <div class="hr"></div>
+
+  <p class="lead"><b>Our website is correct. The feed we send to the marketplaces is not.</b>
+  It sends each car's price <b>before</b> the factory customer bonus is applied. So the shopper
+  on Autotrader or cars.com sees a higher number than the one we will actually take — and a
+  higher number than our own website shows them.</p>
+
+  <div class="cols">
+    <section>
+      <h2>What it looks like on one car</h2>
+      <div class="ex">
+        <div class="car">2026 Tiguan SE R-Line Black · Stock W19519</div>
+        <div class="row"><span>Our website shows the customer</span><span class="v">$39,073</span></div>
+        <div class="row"><span>Autotrader and cars.com show</span><span class="v">$41,573</span></div>
+        <div class="row hi"><span>We are advertised above our own price by</span><span class="v">$2,500</span></div>
+        <div class="note">Same car, same day, same dealership. The $2,500 is the factory
+        Customer Bonus — it is already on our website and already funded by VW.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>How big it is</h2>
+      <div class="nums">
+        <div class="num"><div class="v">128<span style="font-size:12px;color:var(--muted)"> of 136</span></div>
+          <div class="k">New cars carrying a bonus neither site is showing</div></div>
+        <div class="num"><div class="v">136<span style="font-size:12px;color:var(--muted)"> of 136</span></div>
+          <div class="k">Cars where the pattern holds — zero exceptions</div></div>
+      </div>
+      <p style="font-size:11.5px;margin:0">Total factory money invisible to shoppers right now:
+      <b>$368,500 on Autotrader</b> and <b>$463,428 on cars.com</b>.<span class="note"
+      style="display:block;margin-top:3px">Same cars on both sites — not additive. cars.com is
+      higher because that site also expects dealer fees quoted separately, and ours are inside
+      the price.</span></p>
+    </section>
+  </div>
+
+  <section>
+    <h2>Why it costs us — shoppers sort by price, and we are sorting ourselves down</h2>
+    <div class="rank">
+      <div class="rk"><span class="m">Tiguan SE R-Line</span>
+        <span><span class="badge b-bad">shown 3rd of 5</span><span class="arrow">→</span>
+        <span class="badge b-good">actually 1st</span>
+        <span class="why">&nbsp; 21 in stock — we look mid-pack, we are the cheapest.</span></span></div>
+      <div class="rk"><span class="m">Atlas SE w/Tech</span>
+        <span><span class="badge b-bad">shown last of 3</span><span class="arrow">→</span>
+        <span class="badge b-good">actually 1st</span>
+        <span class="why">&nbsp; 13 in stock — a rival lists the same MSRP $2,900 above our real price.</span></span></div>
+    </div>
+    <p style="font-size:11.5px;margin:6px 0 0">Our two deepest-stocked models — 34 cars. A shopper filtering by price never reaches us.
+    <b>This is consistent with the share we have lost since the pricing tool changed:</b> the
+    previous tool published the after-rebate price; the current feed does not.</p>
+  </section>
+
+  <div class="cols">
+    <section>
+      <div class="nak">
+        <h2 style="margin-bottom:3px">What we are <span style="color:var(--red)">not</span> asking for</h2>
+        <ul>
+          <li><b>Not a price cut.</b> Not one dollar of gross changes.</li>
+          <li><b>Not our money.</b> The bonus is factory cash, already funded.</li>
+          <li><b>Not a new offer.</b> It is the same price we already advertise on our own website and already honor in the store.</li>
+        </ul>
+        <p style="font-size:11.5px;margin:6px 0 0"><b>We are asking to publish the price we
+        are already selling at.</b></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>The fix</h2>
+      <div class="fix">
+        <p style="font-size:11.5px;margin:0"><b>One field in each feed. Not a project.</b></p>
+        <ol>
+          <li><b>cars.com</b> — send the after-bonus price, and move the $698 dealer fee out of the price field.</li>
+          <li><b>Autotrader</b> — send the after-bonus price, keep the fee in the price, and take it back out of MSRP.</li>
+        </ol>
+        <p class="note" style="margin-top:5px">The two sites quote fees differently, so one global
+        change fixes one and breaks the other. They must be set separately.</p>
+      </div>
+    </section>
+  </div>
+
+  <section>
+    <h2>If you hear this in the room</h2>
+    <table class="obj">
+      <tr><td>“The pricing on our site is right.”</td>
+          <td>It is. This is only about what we transmit to Autotrader and cars.com.</td></tr>
+      <tr><td>“We can't advertise that low.”</td>
+          <td>We already do — on our own website, today, on the same cars.</td></tr>
+      <tr><td>“That's a margin giveaway.”</td>
+          <td>No gross moves. The bonus is factory money we already deduct at the desk.</td></tr>
+      <tr><td>“The feed is working as designed.”</td>
+          <td>It is mapped to the wrong price column. 136 of 136 cars, zero exceptions — that is a setting, not a bug we are guessing at.</td></tr>
+    </table>
+  </section>
+
+  <div class="deadline">
+    <div>
+      <div class="t">The Tiguan Customer Bonus ends 31 August 2026.</div>
+      <div class="d">Roughly five weeks. Every day it stays wrong, 128 cars are advertised above
+      their real price on both major marketplaces — during the window VW funded the bonus to move them.</div>
+    </div>
+  </div>
+
+  <footer>Findings verified twice by two independent reviews that produced identical figures.
+  Full per-car detail, method and evidence: <b>cars.com audit</b> and <b>Autotrader audit</b>,
+  2026-07-27. Market-share attribution reflects the timing of the pricing-tool change and is not
+  quantified in the underlying audits.</footer>
+
+</div>
