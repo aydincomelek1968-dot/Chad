@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+
+# last30days runtime artifacts
+.claude/skills/last30days/scripts/lib/vendor/
