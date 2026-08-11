@@ -7,11 +7,12 @@ or it did not, and the report states which.
 
 ## Platform landscape (verified 2026-08-11)
 
-The five stores run on at least three different website platforms, and two of the
-five block scripted requests outright. There is no single scraping approach.
+The stores run on at least four different website platforms, and three of six
+endpoints block scripted requests outright. There is no single scraping approach.
 
 | Dealer | URL | Status | Platform |
 |---|---|---|---|
+| **VW North Scottsdale (US)** | `vwnorthscottsdale.com/new-vehicles/` | **403** | Cars Commerce / Dealer Inspire |
 | Camelback VW | `camelbackvw.com/new-inventory/index.htm` | 200 | Dealer.com (DDC v9) |
 | Lunde's Peoria VW | `peoriavw.com/searchnew.aspx` | 200 | Sincro/DealerOn family |
 | Chapman VW Scottsdale | `chapmanvw.com/search/new` | 200 | Fox Dealer |
@@ -20,6 +21,58 @@ five block scripted requests outright. There is no single scraping approach.
 
 Chapman runs two live domains on different platforms. Confirm which is the current
 retail site before collecting, or the same cars get counted twice.
+
+## Collecting our own store
+
+This is the one that cannot be skipped, and it is also the most defended.
+
+**What was verified:** every path on `vwnorthscottsdale.com` returns HTTP 403 to
+scripted requests — `/new-vehicles/`, `/new-inventory/`, `/inventory/new/`, even
+`/sitemap.xml` and the site root. Response headers show `server: cloudflare` with a
+`__cf_bm` cookie and a Cloudflare "Attention Required" interstitial. The
+`x-cars-signature-v1` header identifies the platform as Cars Commerce / Dealer
+Inspire, and the Dealer.com-style path `/new-inventory/index.htm` 301-redirects to
+`/new-vehicles/`, confirming it is not a Dealer.com store.
+
+A markdown-converting fetcher gets *past* Cloudflare but only retrieves the
+navigation shell — the vehicle cards are rendered client-side. It does return the
+page title, which reported **127 new units**. Useful as a validation target, not as
+data.
+
+**So: a real browser is required.** Use the `cloakbrowser` skill, then parse the
+saved HTML:
+
+```bash
+python3 scripts/extract_inventory.py --html saved_vwns.html \
+  --dealer vwnorthscottsdale > data/raw/vwnorthscottsdale.json
+```
+
+**Not yet verified:** browser-based collection of this site has *not* been proven
+end-to-end. The attempt was made in a sandbox whose egress proxy the stealth browser
+could not traverse — it failed to reach any site, including `example.com`, so the
+failure says nothing about Cloudflare or about this dealer. On a normal machine with
+direct network access this is the expected-to-work path, but treat the first run as a
+test rather than an assumption.
+
+Fallbacks if the browser route does not pan out:
+
+1. **Our own DMS or inventory feed.** We are the dealer — we have authoritative
+   access to our own stock, pricing, MSRP, and true days-in-stock without scraping
+   anything. This is strictly better data than our website exposes, and it sidesteps
+   the problem entirely. Prefer it if a feed or export is available.
+2. **Save the SRP by hand.** Open `/new-vehicles/`, scroll until all units load,
+   save the page, and point `--html` at it.
+3. **Per-model pages** at `/new-vehicles/{model}/` (jetta, tiguan, atlas, taos, id-4,
+   id-buzz, …) — smaller pages, easier to render fully, and they naturally chunk the
+   collection by model line.
+
+**Dealer Inspire field mappings are unconfirmed.** The extractor will detect the
+platform and fall back to schema.org JSON-LD, which yields identity and one price but
+usually no discount breakdown. Before trusting any discount component from this
+platform, confirm the mapping against a real rendered page and record it in
+`references/pricing-normalization.md`. Comparing our JSON-LD-only price against
+competitors' fully itemized ladders is an apples-to-oranges trap: their advertised
+price may include conditional rebates that ours does not.
 
 ## Extraction paths, best to worst
 

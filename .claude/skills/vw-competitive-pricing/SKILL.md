@@ -47,15 +47,24 @@ conditional rebates is not underpricing the market; it is advertising differentl
 Chasing that phantom price with real dealer money is the single most expensive
 mistake this analysis can cause. Keep the two in separate columns, always.
 
-## Before starting: who are we?
+## Who we are
 
-`config/dealerships.json` needs `our_dealer` filled in. There is no "us" to compare
-against until it is. If the user has not said which store is theirs, **ask** - this
-is the one question worth blocking on, because every number in the report is
-relative to it.
+**Volkswagen North Scottsdale** (Penske Automotive Group), 7001 E Chauncey Ln,
+Phoenix AZ 85054 — `vwnorthscottsdale.com`, new-inventory SRP at `/new-vehicles/`.
 
-Copy `config/dealerships.example.json`, which already carries verified URLs and
-per-site notes for the four Phoenix-market competitors.
+Competitors: Lunde's Peoria VW, Berge VW (Gilbert), Camelback VW (Phoenix), and
+Chapman VW Scottsdale. Chapman is the closest rival — the other Scottsdale store,
+competing for the same walk-in and local-search traffic — so its moves matter most.
+
+Copy `config/dealerships.example.json` to `dealerships.json`; it already carries
+verified URLs, platforms, and per-site collection notes for all five stores.
+
+**Our own site is the hard one.** `vwnorthscottsdale.com` sits behind Cloudflare bot
+management and renders listings in JavaScript, so it returns a block page to scripted
+fetches and a bare nav shell to simple renderers. Collecting it needs a real browser
+(see `references/data-collection.md`). This is not an edge case to route around: every
+figure in the report is relative to us, so a run that misses our store yields no
+analysis at all — not a partial one. Resolve it before spending effort on competitors.
 
 ## Workflow
 

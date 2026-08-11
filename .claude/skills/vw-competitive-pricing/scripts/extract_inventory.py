@@ -302,6 +302,11 @@ def detect_platform(html):
         return "dealercom"
     if re.search(r'"(markupsTotal|rebatesEveryoneTotal)"', html):
         return "fox"
+    # Dealer Inspire / Cars Commerce (our own store). Named explicitly so the run
+    # summary reports what it actually hit rather than silently degrading to the
+    # JSON-LD fallback, which carries price but no discount breakdown.
+    if re.search(r'dealerinspire|x-cars-signature|cars-commerce', html, re.I):
+        return "dealerinspire"
     if "application/ld+json" in html:
         return "jsonld"
     return "unknown"
@@ -338,6 +343,13 @@ def extract(html, dealer, url):
             "jsonld": extract_jsonld}.get(plat, lambda h: [])(html)
     if not rows and plat != "jsonld":
         rows = extract_jsonld(html)  # last-resort fallback
+        if rows:
+            # Worth saying out loud: a dealer collected this way has price data but
+            # no discount breakdown, so its "discount" cannot be compared against a
+            # dealer whose itemized ladder we parsed in full.
+            print(f"  NOTE: {dealer} fell back to JSON-LD ({plat} mapping "
+                  f"unverified) - price only, NO discount components",
+                  file=sys.stderr)
     out = []
     for r in rows:
         if not is_new(r):
