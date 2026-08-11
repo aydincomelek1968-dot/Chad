@@ -38,35 +38,50 @@ gross should move them, and the reasoning above is what to reason from.
 Always report the **sample size** alongside the position. "Uncompetitive on Atlas
 (n=2)" is a hypothesis; at n=14 it is a finding.
 
-## 1b. Displaying MSRP only — check this before any discount math
+## 1b. Never infer a discount policy from a listing grid
 
-Before comparing discount levels, check whether we are showing a discounted price at
-all. Observed 2026-08-11 across our Tiguan and Jetta pages and the specials page
-(127 units): **every listing shows MSRP and nothing else** — no dealer discount, no
-rebate, no sale price, not even a "contact us for price" prompt. Same-day,
-Camelback advertised a Jetta at $24,613 against $26,876 MSRP, and Chapman at $24,866.
+A search-results page shows a summary price. The itemized ladder lives on the
+**vehicle detail page**. Reading the grid and concluding anything about discount
+policy is a mistake — one made during this skill's own development, which is why it
+gets its own section.
 
-If that holds, it outranks every finding in this playbook, because it is not a
-pricing problem — it is a *merchandising* one:
+What happened: a markdown-converting fetcher returned our listing cards with a single
+price and no pricing breakdown, and returned the listing grid again when pointed at a
+detail page. That reads exactly like "this store publishes no discount," and that
+conclusion was drawn and was **wrong**. The live page shows a full ladder on every
+card:
 
-- Shoppers sort and filter search results by price. A unit displaying full sticker
-  loses the comparison before anyone reads the trim.
-- Third-party syndication may still show a discounted figure, so the same car can
-  look cheaper on cars.com than on our own site — we lose the click we paid for.
-- No amount of additional dealer discount helps if the discounted number never
-  reaches the listing.
+```
+2026 Atlas 2.0T SEL Premium R-Line AWD   (stock W19461)
+MSRP                                      $58,030
+Discount                                 − $2,600     <- true dealer discount, 4.48%
+Dealer Fees                              +   $698
+Retail Customer Bonus                    − $3,500     <- factory money
+Excl. tax, gov. fees                      $52,628     <- advertised
+Military & First Responders Program      −   $500     <- conditional, below the line
+```
 
-**Do not confuse display with policy.** MSRP-only online does not mean we sell at
-MSRP; the store may discount hard in person. Confirm with management which it is,
-because the two call for opposite responses:
+Note the shape: **$5,402 total off MSRP, of which only $2,600 is ours.** Quoting the
+$5,402 as "our discount" overstates what we give by more than double — the same trap
+described in `pricing-normalization.md`, and the reason recommendations are always
+expressed as dealer discount.
 
-| If | Then |
-|---|---|
-| We discount in the deal but don't publish it | Merchandising fix — publish the price. Cheap, fast, no gross cost. |
-| We genuinely hold near MSRP | Real pricing decision — run the full playbook below. |
+The rules that follow from this:
 
-The first case is the single highest-return action in this analysis: it costs no
-gross at all and changes what every online shopper sees.
+- **A tool reporting "no discount" is a claim about the tool, not the dealer** —
+  until confirmed against a rendered page. Converters drop structured pricing blocks
+  silently, returning something that reads like a clean result.
+- **Verify a no-discount finding before it reaches a conclusion.** It is the single
+  highest-consequence claim this analysis can make about a competitor, and the
+  cheapest to get wrong. One screenshot settles it.
+- **Discount varies by model within a store.** On the same page, Atlas units carried
+  thousands off while a Golf R showed no discount at all. A single model tells you
+  nothing about the store — this is Step 6's rule, and it applies to us too.
+
+Where a genuine display gap *does* exist — a dealer discounting in the deal but not
+publishing it anywhere a shopper can see — it is worth flagging, because shoppers
+filter by price and an unpublished discount wins no consideration. But establish it
+from rendered pages across several units and several models.
 
 ## 2. Inventory pressure
 

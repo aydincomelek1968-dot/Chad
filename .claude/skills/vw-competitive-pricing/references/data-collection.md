@@ -12,7 +12,7 @@ endpoints block scripted requests outright. There is no single scraping approach
 
 | Dealer | URL | Status | Platform | Extraction |
 |---|---|---|---|---|
-| **VW N Scottsdale (US)** | `vwnorthscottsdale.com/new-vehicles/` | **403** | Dealer Inspire | ❌ blocked |
+| **VW N Scottsdale (US)** | `vwnorthscottsdale.com/new-vehicles/` | **403** | Dealer Inspire | ⚠️ browser only — full ladder on SRP |
 | Camelback VW | `camelbackvw.com/new-inventory/index.htm` | 200 | Dealer.com (DDC v9) | ✅ 24/page verified |
 | Chapman VW Scottsdale | `chapmanvw.com/search/new` | 200 | Fox Dealer (Nuxt/devalue) | ✅ 100 units verified |
 | Lunde's Peoria VW | `peoriavw.com/searchnew.aspx` | 200 | Sincro/DealerOn family | ⚠️ **0 records** |
@@ -34,151 +34,70 @@ retail site before collecting, or the same cars get counted twice.
 
 This is the one that cannot be skipped, and it is also the most defended.
 
-**What was verified:** every path on `vwnorthscottsdale.com` returns HTTP 403 to
-scripted requests — `/new-vehicles/`, `/new-inventory/`, `/inventory/new/`, even
-`/sitemap.xml` and the site root. Response headers show `server: cloudflare` with a
-`__cf_bm` cookie and a Cloudflare "Attention Required" interstitial. The
-`x-cars-signature-v1` header identifies the platform as Cars Commerce / Dealer
-Inspire, and the Dealer.com-style path `/new-inventory/index.htm` 301-redirects to
+**Scripted access is blocked.** Every path on `vwnorthscottsdale.com` returns HTTP
+403 — `/new-vehicles/`, `/new-inventory/`, `/inventory/new/`, even `/sitemap.xml`
+and the site root. Headers show `server: cloudflare` with a `__cf_bm` cookie and a
+Cloudflare interstitial. The `x-cars-signature-v1` header identifies the platform as
+Cars Commerce / Dealer Inspire, and `/new-inventory/index.htm` 301-redirects to
 `/new-vehicles/`, confirming it is not a Dealer.com store.
 
-A markdown-converting fetcher gets *past* Cloudflare but only retrieves the
-navigation shell — the vehicle cards are rendered client-side. It does return the
-page title, which reported **127 new units**. Useful as a validation target, not as
-data.
+**The site publishes a full itemized ladder — on every search-results card.** MSRP,
+Discount, Dealer Fees, Retail Customer Bonus, "Excl. tax, gov. fees", conditional
+programs, stock number and VIN, across all 127 units. The mapping and a worked
+example are in `references/pricing-normalization.md`.
 
-**What works today: per-model pages via a markdown-converting fetcher.** The main
-SRP at `/new-vehicles/` returns only the navigation shell, but the per-model pages
-render their listings and are readable:
+### WARNING: this site defeats markdown-converting fetchers
 
-```
-https://www.vwnorthscottsdale.com/new-vehicles/{model}/
-   models: jetta, jetta-gli, taos, tiguan, atlas, atlas-cross-sport,
-           id-4, id-buzz, golf-gti, golf-r
-```
+A markdown fetcher gets past Cloudflare, but returns those same cards stripped down
+to a single price with no ladder — **silently, with no error**, on pages that show
+the full breakdown to any human viewer. Pointed at a vehicle detail page, it serves
+the listing grid instead, which reads as "detail page has no pricing."
 
-Verified: the Tiguan page returned 32 units with VIN and MSRP; the specials page
-confirmed all 127 across the lineup. Collecting model-by-model also chunks the work
-naturally and sidesteps SRP pagination.
+During this skill's development that combination produced a confident, completely
+wrong conclusion: that the store published no discounts at all, followed by a
+merchandising recommendation built on nothing. A single screenshot overturned it.
 
-**What these pages do NOT give: any discount.** Every listing shows MSRP and nothing
-else — no dealer discount, no rebate, no sale price, no "contact for price" prompt.
-Vehicle detail pages did not expose an itemized ladder either. So our own discount
-*composition* is not recoverable from our public site.
+The rule: **absence of pricing in a converted document is evidence about the
+converter, not about the dealer.** Treat any "no discount found" result as unproven
+until confirmed against a rendered page or a screenshot.
 
-That is a finding in its own right, not just a collection obstacle — see
-"Displaying MSRP only" in `references/analysis-playbook.md`.
+### What to use instead
 
-**Browser route unproven.** A rendering browser would be the way to reach the JS
-layer, but this could not be tested here: the sandbox blocks browser egress entirely
-(port-level refusal, failing even on `example.com`), so neither CloakBrowser nor
-stock Playwright Chromium could reach any site. That says nothing about Cloudflare or
-about this dealer. On a machine with normal network access it is worth trying, but
-treat the first run as a test.
+1. **The DMS or inventory feed — preferred.** We are the dealer. The feed carries
+   MSRP, actual selling price, cost, true days-in-stock and gross, which is more than
+   the website exposes and moots the access problem entirely.
+2. **Claude in Chrome.** The account has the extension enabled. It runs in the user's
+   own logged-in browser, so it renders JavaScript, carries real session cookies, and
+   is subject to neither Cloudflare nor sandbox egress limits. It is driven by the
+   user from claude.ai rather than callable from a Claude Code session, so the
+   workflow is: they run it, then hand back the output. It reads the public SRP ladder
+   directly, and it is the only practical route to authenticated systems — the DMS
+   inventory screen, the Dealer Inspire admin (pricing rules), and the VW dealer
+   portal (program money, universal vs conditional terms).
+3. **Save the SRP by hand.** Open `/new-vehicles/`, scroll until all units load, save
+   the page, and point the extractor at it with `--html`. Per-model pages at
+   `/new-vehicles/{model}/` (jetta, jetta-gli, taos, tiguan, atlas, atlas-cross-sport,
+   id-4, id-buzz, golf-gti, golf-r) are smaller and chunk the work by model line.
 
-**Preferred route for our own store: the DMS or inventory feed.** We are the dealer.
-The feed carries MSRP, actual selling price, cost, true days-in-stock, and the
-discount composition our website does not publish. It is strictly better than
-anything scraped and it moots the whole access problem.
-
-### Claude in Chrome — the practical way to reach our own systems
-
-The account has the Claude in Chrome extension enabled. It runs in the user's own
-logged-in browser on their machine, so it renders JavaScript, carries real session
-cookies, and is not subject to the bot-blocking or sandbox egress limits described
-above. It is driven by the user from claude.ai, not callable from a Claude Code
-session — so the workflow is: they run it, then hand the output back.
-
-Worth being precise about what it does and does not solve:
-
-- **It does not help on our public site.** It would render the same per-model pages
-  and find the same MSRP-only listings. The constraint there is not access, it is
-  that the discount is not published. No browser creates data that is not there.
-- **It is decisive on authenticated systems**, which is where the missing data
-  actually lives: the DMS inventory screen (selling price, cost, true days in stock,
-  gross), the Dealer Inspire admin (pricing rules — and whether discounts are
-  configured but not set to display), and the VW dealer portal (current program
-  money, and which rebates are universal vs conditional).
-
-A prompt that produces a directly loadable export:
+A prompt that produces a directly loadable export from the DMS:
 
 > Export the current new-vehicle inventory list. For every unit give me: VIN, stock
 > number, year, model, trim, drivetrain, MSRP, any dealer addendum/accessories,
 > current asking/internet price, dealer discount applied, factory rebate applied,
 > days in stock, and whether it's in-transit or a courtesy loaner. Output as CSV.
 
-Save the CSV to `data/raw/` and normalize it to the same field names the extractor
-emits (`vin`, `msrp`, `dealer_discount`, `universal_incentive`, `universal_applied`,
-`advertised_price`, `doc_fee`, `dealer_addons`, `days_in_stock`) so
-`analyze_pricing.py` can consume it alongside the scraped competitor files.
+Normalize to the field names the extractor emits (`vin`, `msrp`, `dealer_discount`,
+`universal_incentive`, `universal_applied`, `advertised_price`, `doc_fee`,
+`dealer_addons`, `days_in_stock`) so `analyze_pricing.py` consumes it alongside the
+scraped competitor files.
 
-Fallbacks if the browser route does not pan out:
+**Parser status:** no Dealer Inspire parser exists yet. Once a rendered SRP is saved,
+add one using the ladder mapping in `pricing-normalization.md` — the labels are
+stable and the arithmetic reconciles, so it is a straightforward addition.
 
-1. **Our own DMS or inventory feed.** We are the dealer — we have authoritative
-   access to our own stock, pricing, MSRP, and true days-in-stock without scraping
-   anything. This is strictly better data than our website exposes, and it sidesteps
-   the problem entirely. Prefer it if a feed or export is available.
-2. **Save the SRP by hand.** Open `/new-vehicles/`, scroll until all units load,
-   save the page, and point `--html` at it.
-3. **Per-model pages** at `/new-vehicles/{model}/` (jetta, tiguan, atlas, taos, id-4,
-   id-buzz, …) — smaller pages, easier to render fully, and they naturally chunk the
-   collection by model line.
-
-**Dealer Inspire field mappings are unconfirmed.** The extractor will detect the
-platform and fall back to schema.org JSON-LD, which yields identity and one price but
-usually no discount breakdown. Before trusting any discount component from this
-platform, confirm the mapping against a real rendered page and record it in
-`references/pricing-normalization.md`. Comparing our JSON-LD-only price against
-competitors' fully itemized ladders is an apples-to-oranges trap: their advertised
-price may include conditional rebates that ours does not.
-
-## Extraction paths, best to worst
-
-**1. Inline JSON in the SRP.** Dealer.com and Fox both ship the full inventory
-payload inside the search-results HTML. No API needed, and it carries the itemized
-price ladder. This is what `extract_inventory.py` targets first.
-
-Dealer.com vehicle records contain `vin`, `stockNumber`, `year`, `make`, `model`,
-`trim`, `bodyStyle`, `condition`, `inventoryDate` (which yields days in stock), and
-a `pricing.dprice[]` ladder. Fox records expose `msrp`, `discountsTotal`,
-`markupsTotal`, `rebatesEveryoneTotal`, `rebatesAppliedTotal`, `docFee`, and an
-`isCourtesy` flag for service loaners.
-
-**2. schema.org JSON-LD.** Most dealer platforms emit `Vehicle`/`Car` nodes with
-`vehicleIdentificationNumber`, `sku`, and an `offers.price`. Useful as a
-cross-platform fallback for identity and one price, but it rarely carries the
-discount breakdown — which is the part that matters. Treat a JSON-LD-only dealer as
-having *price* data but not *discount* data, and say so in the report.
-
-**3. Vehicle detail pages.** Slow, but authoritative. Use for spot-verifying any
-result that looks anomalous, and for reading the fine print that changes the real
-advertised price.
-
-## When a site blocks you (403 / 429)
-
-Two of five stores do this today, including Berge — which claims to be the largest
-VW dealer in the Phoenix market. Dropping it silently would distort every market
-average in the report.
-
-Escalate in this order:
-
-1. **Use the `cloakbrowser` skill.** It is available in this environment and exists
-   precisely for sites that reject scripted traffic. Drive the SRP, let it render,
-   save the HTML, then parse the saved file:
-   ```bash
-   python3 scripts/extract_inventory.py --html saved_berge.html --dealer berge \
-     > data/raw/berge.json
-   ```
-2. **Use cars.com syndication** — verified to reach every blocked store. See
-   "Syndication fallback" below for what it does and does not give you.
-3. **Collect manually.** A human can open the SRP and save the page.
-4. **Declare the gap.** If none of the above works, the dealer is excluded from
-   every average and the report says so explicitly, by name, in the data-quality
-   section and next to any conclusion it would have affected.
-
-Never substitute "typical market pricing" or a prior week's numbers for a dealer
-you could not reach this run. Stale data presented as current is the same failure
-as invented data, just slower-acting.
+**Browser automation inside this sandbox does not work at all** — port-level egress
+refusal, failing even on `example.com`, for both CloakBrowser and stock Playwright.
+That is environmental and says nothing about Cloudflare or this dealer.
 
 ## Syndication fallback (cars.com) — verified 2026-08-11
 

@@ -73,8 +73,15 @@ Two routes exist, and they are complementary rather than alternatives:
   split between dealer discount, factory cash, and conditional rebates. Good for
   market-wide coverage, inventory depth, and price levels; never sufficient on its
   own for a discount recommendation.
-- **Itemized ladders** come from the dealer sites that allow direct collection
-  (Camelback, Chapman) — these carry the component breakdown the analysis turns on.
+- **Itemized ladders** come from the dealer sites: Camelback and Chapman via direct
+  parsing, and our own site via a real browser — our SRP prints a full ladder on
+  every card, but only a rendering browser can see it.
+
+**A hard-won warning:** markdown-converting fetchers silently strip the pricing block
+from our site and return a bare price, which once produced a confident and completely
+wrong "this store publishes no discounts" conclusion. Absence of pricing in a
+converted document is evidence about the converter, not the dealer — confirm against
+a rendered page before recording anything about a dealer's pricing structure.
 
 For our own store, prefer the **DMS or inventory feed**: we need our discount
 composition exactly, and we already own that data. See

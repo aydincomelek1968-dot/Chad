@@ -151,6 +151,58 @@ discounts above 45% of MSRP are rejected at extraction with a printed reason. Th
 bounds catch structural parser failure, not unusual deals. A parser that emits
 nonsense is worse than one that emits nothing: nothing is visible, nonsense is not.
 
+### Dealer Inspire (VW North Scottsdale — us) — verified from the live site
+
+The full ladder is printed on **every search-results card**, not just the detail
+page: MSRP, Discount, Dealer Fees, Retail Customer Bonus, "Excl. tax, gov. fees",
+conditional programs, stock number and VIN all appear inline on the SRP across all
+127 units. Observed on stock W19461, VIN 1V2FN2CAXTC582041:
+
+| Label on page | Amount | Bucket |
+|---|---:|---|
+| MSRP | $58,030 | MSRP |
+| **Discount** | −$2,600 | **Dealer discount** (4.48% of MSRP) |
+| Dealer Fees | +$698 | Fees |
+| **Retail Customer Bonus** | −$3,500 | **Universal incentive** (applied) |
+| Excl. tax, gov. fees | $52,628 | Advertised price |
+| Military & First Responders Program | −$500 | **Conditional** (below the line) |
+
+```
+MSRP − Discount + Dealer Fees − Retail Customer Bonus = advertised
+58,030 − 2,600 + 698 − 3,500 = 52,628   ✓ exact
+```
+
+Structurally identical to the Dealer.com ladder, and the same formula the analyzer
+already reconciles against. `universal_applied` is **true** here — the Retail
+Customer Bonus is deducted before the displayed price, unlike Chapman.
+
+Two things this pins down:
+
+- **The $698 is Dealer Fees**, a flat per-unit charge — not accessories or addendum.
+  It explains the recurring +$698 delta between cars.com's base MSRP and its listed
+  price on our units, an anomaly earlier guessed to be a dealer addendum. It is not.
+- **Total off MSRP is $5,402 but only $2,600 is dealer money.** Reporting the larger
+  figure as our discount overstates the gross we give by more than 2×.
+
+Watch the label wording: "Retail Customer Bonus" is factory cash for retail
+purchases. It is universal among retail buyers but does not apply to a lease deal, so
+confirm the terms before treating it as unconditional in a lease-heavy comparison.
+
+**Discount varies sharply by model.** On the same SRP, Atlas units carry discounts in
+the thousands while a Golf R shows only MSRP + Dealer Fees and no discount at all.
+Never characterize this store — or any store — from one model line.
+
+**Collection caveat, and it is a serious one:** markdown-converting fetchers do not
+see this pricing block. They return the cards with a single price figure and no
+ladder, *silently and with no error*, on pages that visibly contain the full
+breakdown to any human viewer. During this skill's development that produced a
+confident, wrong conclusion that the store published no discounts at all.
+
+So for this site: **do not trust a markdown fetcher for pricing.** Use a real browser
+(Claude in Chrome) or the DMS feed. And treat "no discount lines found" from any
+fetcher as *unproven* until confirmed against a rendered page — absence in a
+converted document is evidence about the converter, not about the dealer.
+
 ### JSON-LD fallback
 
 Gives identity and `offers.price` only. A dealer collected this way has price data

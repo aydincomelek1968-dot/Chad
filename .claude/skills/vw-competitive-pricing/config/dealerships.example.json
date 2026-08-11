@@ -23,27 +23,25 @@
       ],
       "model_page_pattern": "https://www.vwnorthscottsdale.com/new-vehicles/{model}/",
       "platform": "dealerinspire",
-      "verified": "2026-08-11 SRP 403/shell, but per-model pages readable via markdown fetcher (Tiguan=32 units w/ VIN+MSRP; 127 total). MSRP ONLY - no discount published.",
+      "verified": "2026-08-11 Cloudflare-blocked to scripts. Live SRP shows FULL itemized ladder on every card (MSRP/Discount/Dealer Fees/Retail Customer Bonus/Excl tax/conditional) across 127 units - confirmed by screenshot.",
       "expected_unit_count": 127,
       "notes": [
         "THIS IS US. Every figure is relative to this store.",
         "",
-        "COLLECTION: /new-vehicles/ returns only a nav shell, but per-model pages",
-        "render listings and are readable with a markdown-converting fetcher. Use",
-        "model_slugs to walk the lineup - it also sidesteps SRP pagination.",
+        "WE DO PUBLISH DISCOUNTS. The full ladder is on every SRP card and the VDP.",
+        "An earlier 'MSRP only' conclusion was WRONG - a markdown-converting fetcher",
+        "silently dropped the pricing block and returned a single price. Do not trust",
+        "that class of tool for pricing on this site.",
         "",
-        "CRITICAL FINDING: every listing shows MSRP and nothing else - no dealer",
-        "discount, no rebate, no sale price, no 'contact for price'. Competitors",
-        "publish discounted prices the same day. Our discount COMPOSITION is not",
-        "recoverable from the public site; use the DMS feed for that.",
+        "COLLECTION: use a real browser (Claude in Chrome) or the DMS feed. Scripted",
+        "fetches are Cloudflare-blocked; converters return degraded content.",
         "",
-        "Confirm with management whether MSRP-only is display or policy - the two",
-        "call for opposite responses. See analysis-playbook.md section 1b.",
+        "Discount varies sharply by model - Atlas heavily discounted, Golf R shows",
+        "MSRP + Dealer Fees only. Never characterize the store from one model.",
         "",
-        "cars.com 'MSRP' is BASE msrp; its 'listed price' equals the as-configured",
-        "MSRP on our own site (verified on VIN 3VVUW7RM6TM130947 = $47,005). We are",
-        "listing AT sticker, not above it - an earlier above-MSRP reading was that",
-        "artifact, now resolved."
+        "The $698 is DEALER FEES, a flat per-unit charge - not addendum/accessories.",
+        "It explains the recurring +$698 gap between cars.com base MSRP and listed",
+        "price on our units."
       ],
       "carscom_url": "https://www.cars.com/dealers/109556/volkswagen-north-scottsdale/inventory/?stock_type=new",
       "carscom_units_verified": 126,
@@ -60,7 +58,16 @@
         "golf-r"
       ],
       "vdp_pattern": "https://www.vwnorthscottsdale.com/inventory/new-{year}-volkswagen-{model}-{trim}-{body}-{vin_lower}/",
-      "displays_discount": false
+      "displays_discount": true,
+      "price_ladder": {
+        "MSRP": "msrp",
+        "Discount": "dealer_discount",
+        "Dealer Fees": "doc_fee",
+        "Retail Customer Bonus": "universal_incentive (applied)",
+        "Excl. tax, gov. fees": "advertised_price",
+        "Military & First Responders Program": "conditional_incentive"
+      },
+      "ladder_example": "stock W19461 / 1V2FN2CAXTC582041: 58,030 - 2,600 + 698 - 3,500 = 52,628 (dealer discount 4.48%)"
     },
     {
       "key": "lundes",
