@@ -89,22 +89,67 @@ Dealer Added Accessories   $1,538
 True dealer discount is **$1,362 / 5.07%**. A naive read of "up to $4,400 off"
 overstates the store's actual aggression by more than 3×.
 
-### Fox Dealer (Chapman)
+### Fox Dealer (Chapman) — verified against 100 live units
 
-The pricing block names its components explicitly:
+Data arrives as a Nuxt `__NUXT_DATA__` payload in **devalue** encoding: one flat
+array where every integer is an index back into that same array. Values must be
+resolved through the pool. Reading them raw yields array offsets that look exactly
+like small dollar amounts — a live mis-parse produced 96 records reading
+`MSRP $294 / discount $295 / price −$11`, each of which the analyzer would happily
+have averaged into a market price.
 
 | Field | Bucket |
 |---|---|
 | `msrp` | MSRP |
 | `markupsTotal` | Dealer add-ons / addendum |
 | `discountsTotal` | Dealer discount |
-| `rebatesEveryoneTotal` | Universal incentive |
-| `rebatesAppliedTotal` | All rebates applied |
+| `rebatesAppliedTotal` | Rebates **deducted from the shown price** |
+| `rebatesEveryoneTotal` | Universal rebates **available** |
 | `docFee` | Fees |
+| `type` | `N` new / `U` used / `C` certified |
+| `isCourtesy`, `isInTransit`, `isCertified` | exclusion flags |
 
-Conditional incentive is `rebatesAppliedTotal − rebatesEveryoneTotal` — this
-platform helpfully draws the universal/conditional line for us. `isCourtesy` flags
-service loaners, which must be excluded from new retail comparisons.
+```
+advertised_price = msrp + markupsTotal − discountsTotal − rebatesAppliedTotal
+```
+
+## The un-applied rebate trap
+
+`rebatesAppliedTotal` and `rebatesEveryoneTotal` are **not** the same thing, and
+conflating them is a $1,500 error.
+
+Observed live: Chapman shows `rebatesEveryone = $1,500` with `rebatesApplied = $0`
+on all 100 units — the factory cash is disclosed as available but is **not**
+deducted from the advertised price. Camelback, on Dealer.com, deducts the identical
+money before displaying its price.
+
+So the two stores publish prices on different bases. Comparing them raw makes
+Camelback look $1,500 cheaper on identical economics — and a naive parser that
+subtracts `rebatesEveryone` from Chapman's price flips the error the other way,
+painting Chapman as far more aggressive than it is.
+
+Every record therefore carries a `universal_applied` flag, and the normalizer nets
+universal money out everywhere so both sit on one basis. Universal cash is
+available to every buyer, so netting it out is the honest common denominator.
+
+Real numbers from the two stores (2026 Jetta, comparable basis):
+
+| | MSRP | Dealer disc | Universal | Applied? | Advertised | Comparable |
+|---|---:|---:|---:|:--:|---:|---:|
+| Camelback | $26,876 | $1,362 | $1,500 | yes | $24,613 (incl. $599 fee) | $24,014 |
+| Chapman | $25,685 | $819 | $1,500 | **no** | $24,866 | $22,777 |
+
+Chapman's *dealer* discount is smaller ($819 vs $1,362) while its comparable price
+is lower — because its MSRP is lower and its factory cash is still on the table.
+This is exactly why dealer discount % and comparable price are reported separately;
+either one alone tells a misleading story.
+
+### Sanity bounds
+
+Records outside roughly $18k–$90k MSRP, with non-positive advertised price, or with
+discounts above 45% of MSRP are rejected at extraction with a printed reason. These
+bounds catch structural parser failure, not unusual deals. A parser that emits
+nonsense is worse than one that emits nothing: nothing is visible, nonsense is not.
 
 ### JSON-LD fallback
 

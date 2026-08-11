@@ -10,14 +10,22 @@ or it did not, and the report states which.
 The stores run on at least four different website platforms, and three of six
 endpoints block scripted requests outright. There is no single scraping approach.
 
-| Dealer | URL | Status | Platform |
-|---|---|---|---|
-| **VW North Scottsdale (US)** | `vwnorthscottsdale.com/new-vehicles/` | **403** | Cars Commerce / Dealer Inspire |
-| Camelback VW | `camelbackvw.com/new-inventory/index.htm` | 200 | Dealer.com (DDC v9) |
-| Lunde's Peoria VW | `peoriavw.com/searchnew.aspx` | 200 | Sincro/DealerOn family |
-| Chapman VW Scottsdale | `chapmanvw.com/search/new` | 200 | Fox Dealer |
-| Chapman VW (alt domain) | `chapman-vw.com/new-inventory/index.htm` | **403** | Dealer.com |
-| Berge VW | `bergevw.com/search/?tp=new` | **403** | unknown (blocked) |
+| Dealer | URL | Status | Platform | Extraction |
+|---|---|---|---|---|
+| **VW N Scottsdale (US)** | `vwnorthscottsdale.com/new-vehicles/` | **403** | Dealer Inspire | ❌ blocked |
+| Camelback VW | `camelbackvw.com/new-inventory/index.htm` | 200 | Dealer.com (DDC v9) | ✅ 24/page verified |
+| Chapman VW Scottsdale | `chapmanvw.com/search/new` | 200 | Fox Dealer (Nuxt/devalue) | ✅ 100 units verified |
+| Lunde's Peoria VW | `peoriavw.com/searchnew.aspx` | 200 | Sincro/DealerOn family | ⚠️ **0 records** |
+| Chapman VW (alt domain) | `chapman-vw.com/new-inventory/index.htm` | **403** | Dealer.com | ❌ blocked |
+| Berge VW | `bergevw.com/search/?tp=new` | **403** | unknown | ❌ blocked |
+
+**Lunde's is an open gap.** The page returns HTTP 200 and ~20 VINs are visible in
+the raw HTML, but neither the platform parsers nor the JSON-LD fallback recover
+them — its JSON-LD blocks contain no vehicle nodes and no pricing keys appear in
+the markup. It currently extracts **0 records** and is silently absent from any
+market average unless someone reads the run summary. Resolving it means inspecting
+a saved SRP for the inline payload and adding a parser. Until then, treat every
+Lunde's figure as missing, not as zero.
 
 Chapman runs two live domains on different platforms. Confirm which is the current
 retail site before collecting, or the same cars get counted twice.

@@ -199,61 +199,78 @@ def extract_dealercom(html):
 # ------------------------------------------------------------------ fox dealer
 
 def extract_fox(html):
-    """Fox payloads index-compress values, so pricing fields are pointers into a
-    shared constant pool. We resolve them where the pool is recoverable and skip
-    the record where it is not -- a skipped record is honest, a guessed one is not.
+    """Fox Dealer ships a Nuxt `__NUXT_DATA__` payload using devalue encoding: one
+    flat array where every integer is an index back into that same array. Values
+    must be resolved through the pool -- reading them raw yields array offsets that
+    look exactly like small dollar amounts (an MSRP of "294"), which is the most
+    dangerous possible failure because it flows silently into the analysis.
     """
-    rows = []
-    pool = None
-    m = re.search(r'\[(?:"[^"]*"|[-\d.eE]+|null|true|false|,|\s)+\]', html)
-    if m:
-        try:
-            pool = json.loads(m.group(0))
-        except Exception:
-            pool = None
+    m = re.search(r'id="__NUXT_DATA__"[^>]*>(\[.*?\])</script>', html, re.S)
+    if not m:
+        return []
+    try:
+        pool = json.loads(m.group(1))
+    except Exception:
+        return []
 
-    def deref(v):
-        if isinstance(v, int) and pool and 0 <= v < len(pool):
-            got = pool[v]
-            return got if isinstance(got, (int, float, str)) else None
+    def res(i, depth=0):
+        if depth > 8 or not isinstance(i, int) or not (0 <= i < len(pool)):
+            return i
+        v = pool[i]
+        if isinstance(v, dict):
+            return {k: res(x, depth + 1) for k, x in v.items()}
+        if isinstance(v, list):
+            return [res(x, depth + 1) for x in v]
         return v
 
-    for pm in re.finditer(r'\{"msrp":\s*(\d+)[^{}]*\}', html):
-        obj = enclosing_json(html, pm.start())
-        if not isinstance(obj, dict):
+    rows, seen = [], set()
+    for idx, node in enumerate(pool):
+        if not (isinstance(node, dict) and "vin" in node and "pricing" in node):
             continue
-        vin = None
-        vs = re.search(r'"([A-HJ-NPR-Z0-9]{17})"', html[max(0, pm.start() - 1200):pm.start()])
-        if vs:
-            vin = vs.group(1)
-        if not vin:
+        o = res(idx)
+        vin = o.get("vin")
+        if not isinstance(vin, str) or len(vin) != 17 or vin in seen:
             continue
-        msrp = money(deref(obj.get("msrp")))
-        disc = money(deref(obj.get("discountsTotal"))) or 0.0
-        markup = money(deref(obj.get("markupsTotal"))) or 0.0
-        reb_all = money(deref(obj.get("rebatesAppliedTotal"))) or 0.0
-        reb_everyone = money(deref(obj.get("rebatesEveryoneTotal"))) or 0.0
+        seen.add(vin)
+        p = o.get("pricing") or {}
+        msrp = money(p.get("msrp"))
+        disc = money(p.get("discountsTotal")) or 0.0
+        markup = money(p.get("markupsTotal")) or 0.0
+        reb_applied = money(p.get("rebatesAppliedTotal")) or 0.0
+        reb_everyone = money(p.get("rebatesEveryoneTotal")) or 0.0
         if msrp is None:
             continue
+
+        # Only rebates actually *applied* are inside the displayed price. Observed
+        # live: this store shows $1,500 of universal VW cash as available but does
+        # NOT deduct it, while a Dealer.com competitor deducts the same money up
+        # front. Subtracting it here would understate this dealer's price by $1,500
+        # and paint them as far more aggressive than they are.
+        advertised = msrp + markup - disc - reb_applied
         rows.append({
             "vin": vin,
+            "stock_number": o.get("stockNumber"),
+            "year": o.get("year"),
+            "make": o.get("make"),
+            "model": o.get("model"),
+            "trim": o.get("trim"),
+            "drivetrain": o.get("drive"),
+            "body_style": o.get("body"),
+            "type": o.get("type"),
+            "certified": o.get("isCertified"),
+            "is_courtesy": o.get("isCourtesy"),
+            "in_transit": o.get("isInTransit"),
             "msrp": msrp,
             "dealer_discount": disc or None,
             "dealer_addons": markup or None,
             "universal_incentive": reb_everyone,
-            # Anything applied but not available to everyone is conditional.
-            "conditional_incentive": max(0.0, reb_all - reb_everyone),
-            "advertised_price": (msrp + markup - disc - reb_everyone) if msrp else None,
-            "doc_fee": money(deref(obj.get("docFee"))),
+            "universal_applied": bool(reb_applied),
+            "conditional_incentive": 0.0,
+            "advertised_price": advertised,
+            "doc_fee": money(p.get("docFee")),
             "conditional_detail": [], "universal_detail": [],
         })
-    # de-dup
-    out, seen = [], set()
-    for r in rows:
-        if r["vin"] not in seen:
-            seen.add(r["vin"])
-            out.append(r)
-    return out
+    return rows
 
 
 # --------------------------------------------------------------------- JSON-LD
@@ -312,16 +329,76 @@ def detect_platform(html):
     return "unknown"
 
 
+# A real new VW sits roughly $20k-75k. Anything outside this is not a price we
+# mis-read the currency on -- it is a parser reading the wrong field. Bounds are
+# generous on purpose: the job is to catch structural failure, not to second-guess
+# an unusual deal.
+MSRP_MIN, MSRP_MAX = 18000, 90000
+
+
+def plausible(rec):
+    """Reject records that cannot be real, and say why.
+
+    This exists because of a live failure: a mis-resolved payload produced 96
+    records reading MSRP $294 / discount $295 / price -$11. Every one looked like
+    a valid row to the analyzer, which would have averaged them into a market
+    price. A parser that emits nonsense is worse than one that emits nothing,
+    because nothing is visible and nonsense is not.
+    """
+    msrp, adv = rec.get("msrp"), rec.get("advertised_price")
+    disc = rec.get("dealer_discount")
+    if msrp is not None and not (MSRP_MIN <= msrp <= MSRP_MAX):
+        return False, f"MSRP {msrp:,.0f} outside ${MSRP_MIN:,}-${MSRP_MAX:,}"
+    if adv is not None and adv <= 0:
+        return False, f"advertised price {adv:,.0f} is not positive"
+    if adv is not None and not (MSRP_MIN * 0.6 <= adv <= MSRP_MAX):
+        return False, f"advertised price {adv:,.0f} implausible"
+    if disc is not None and msrp and disc > msrp * 0.45:
+        return False, f"discount {disc:,.0f} exceeds 45% of MSRP"
+    if disc is not None and disc < 0:
+        return False, f"negative discount {disc:,.0f}"
+    return True, None
+
+
 def is_new(rec):
-    """New only. Courtesy/loaner/demo units carry different pricing logic and
-    must not be averaged in with new retail stock."""
+    """New retail only. Courtesy/loaner, demo, in-transit and CPO units carry
+    different pricing logic and must not be averaged into new retail stock."""
     cond = str(rec.get("condition") or "").lower()
     typ = str(rec.get("type") or "").lower()
-    if rec.get("certified") is True:
+    if rec.get("certified") is True or rec.get("is_courtesy") is True:
         return False
     if "used" in cond or "used" in typ or "certified" in cond:
         return False
-    return ("new" in cond) or ("new" in typ) or (cond == "" and typ == "")
+    if typ in ("u", "c"):            # Fox: U=used, C=certified
+        return False
+    if typ == "n" or "new" in cond or "new" in typ:
+        return True
+    return cond == "" and typ == ""
+
+
+# Platforms name the same car differently -- "Jetta Sedan" on one site, "Jetta" on
+# another. Left alone they become separate model lines and never get compared,
+# which quietly removes the largest competitor from a model's market average.
+MODEL_ALIASES = {
+    "jetta sedan": "Jetta", "jetta gli sedan": "Jetta GLI",
+    "golf gti": "Golf GTI", "gti": "Golf GTI", "golf r": "Golf R",
+    "tiguan": "Tiguan", "taos": "Taos", "atlas": "Atlas",
+    "atlas cross sport": "Atlas Cross Sport",
+    "id.4": "ID.4", "id4": "ID.4", "id. buzz": "ID. Buzz", "id.buzz": "ID. Buzz",
+}
+
+
+def normalize_model(name):
+    if not name:
+        return name
+    key = re.sub(r"\s+", " ", str(name).strip().lower())
+    if key in MODEL_ALIASES:
+        return MODEL_ALIASES[key]
+    for suffix in (" sedan", " suv", " hatchback", " wagon"):
+        if key.endswith(suffix):
+            base = key[: -len(suffix)]
+            return MODEL_ALIASES.get(base, base.title())
+    return str(name).strip()
 
 
 def days_in_stock(rec, today=None):
@@ -350,21 +427,39 @@ def extract(html, dealer, url):
             print(f"  NOTE: {dealer} fell back to JSON-LD ({plat} mapping "
                   f"unverified) - price only, NO discount components",
                   file=sys.stderr)
-    out = []
+    out, rejected = [], []
     for r in rows:
         if not is_new(r):
+            continue
+        ok, why = plausible(r)
+        if not ok:
+            rejected.append((r.get("vin"), why))
             continue
         r["dealer"] = dealer
         r["source_url"] = url
         r["platform"] = plat
+        r["model"] = normalize_model(r.get("model"))
         r["days_in_stock"] = days_in_stock(r)
         r["captured_at"] = datetime.now().isoformat(timespec="seconds")
+        # Dealer.com applies universal incentives above the advertised price;
+        # some platforms disclose them without deducting. Record which, so the
+        # analyzer can put both on one basis instead of comparing a net price
+        # against a gross one.
+        r.setdefault("universal_applied", True)
         # Derived, never invented: only compute when both inputs are real.
         if r.get("msrp") and r.get("dealer_discount") is not None:
             r["dealer_discount_pct"] = round(r["dealer_discount"] / r["msrp"] * 100, 2)
         else:
             r["dealer_discount_pct"] = None
         out.append(r)
+
+    if rejected:
+        print(f"  REJECTED {len(rejected)} implausible record(s) - likely a parser "
+              f"or platform change, not real pricing:", file=sys.stderr)
+        for vin, why in rejected[:3]:
+            print(f"    {vin}: {why}", file=sys.stderr)
+        if len(rejected) > 3:
+            print(f"    ... and {len(rejected) - 3} more", file=sys.stderr)
     return out, plat
 
 

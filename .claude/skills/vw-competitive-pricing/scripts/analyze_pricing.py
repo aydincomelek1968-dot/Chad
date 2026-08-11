@@ -73,6 +73,13 @@ def normalize(recs, include_fees=False):
         cond = r.get("conditional_incentive") or 0.0
 
         comparable = adv
+        # Put every dealer on one basis for universal factory money. Observed live:
+        # one store deducts $1,500 of VW cash from its shown price and another
+        # discloses the same $1,500 without deducting it. Comparing those raw makes
+        # the first look $1,500 cheaper on identical economics. Universal money is
+        # available to every buyer, so net it out everywhere.
+        if comparable is not None and not r.get("universal_applied", True):
+            comparable = comparable - (r.get("universal_incentive") or 0.0)
         if comparable is not None and not include_fees:
             comparable = comparable - fee
 
@@ -81,8 +88,18 @@ def normalize(recs, include_fees=False):
         # trusted, because a mis-parsed ladder looks exactly like a real price.
         reconciles = None
         if None not in (msrp, adv) and disc is not None:
-            reconciles = min(abs((msrp + fee - disc - uni) - adv),
-                             abs((msrp - disc - uni) - adv)) < 1.0
+            addons = r.get("dealer_addons") or 0.0
+            applied = uni if r.get("universal_applied", True) else 0.0
+            # Sites differ on whether the doc fee and the factory rebate sit inside
+            # the advertised number, so accept any of the conventions actually
+            # observed rather than forcing one and crying wolf on the rest.
+            candidates = [
+                msrp + fee - disc - applied,
+                msrp - disc - applied,
+                msrp + addons + fee - disc - applied,
+                msrp + addons - disc - applied,
+            ]
+            reconciles = min(abs(c - adv) for c in candidates) < 1.0
 
         rec = dict(r)
         rec.update({
