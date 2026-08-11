@@ -81,6 +81,37 @@ The feed carries MSRP, actual selling price, cost, true days-in-stock, and the
 discount composition our website does not publish. It is strictly better than
 anything scraped and it moots the whole access problem.
 
+### Claude in Chrome — the practical way to reach our own systems
+
+The account has the Claude in Chrome extension enabled. It runs in the user's own
+logged-in browser on their machine, so it renders JavaScript, carries real session
+cookies, and is not subject to the bot-blocking or sandbox egress limits described
+above. It is driven by the user from claude.ai, not callable from a Claude Code
+session — so the workflow is: they run it, then hand the output back.
+
+Worth being precise about what it does and does not solve:
+
+- **It does not help on our public site.** It would render the same per-model pages
+  and find the same MSRP-only listings. The constraint there is not access, it is
+  that the discount is not published. No browser creates data that is not there.
+- **It is decisive on authenticated systems**, which is where the missing data
+  actually lives: the DMS inventory screen (selling price, cost, true days in stock,
+  gross), the Dealer Inspire admin (pricing rules — and whether discounts are
+  configured but not set to display), and the VW dealer portal (current program
+  money, and which rebates are universal vs conditional).
+
+A prompt that produces a directly loadable export:
+
+> Export the current new-vehicle inventory list. For every unit give me: VIN, stock
+> number, year, model, trim, drivetrain, MSRP, any dealer addendum/accessories,
+> current asking/internet price, dealer discount applied, factory rebate applied,
+> days in stock, and whether it's in-transit or a courtesy loaner. Output as CSV.
+
+Save the CSV to `data/raw/` and normalize it to the same field names the extractor
+emits (`vin`, `msrp`, `dealer_discount`, `universal_incentive`, `universal_applied`,
+`advertised_price`, `doc_fee`, `dealer_addons`, `days_in_stock`) so
+`analyze_pricing.py` can consume it alongside the scraped competitor files.
+
 Fallbacks if the browser route does not pan out:
 
 1. **Our own DMS or inventory feed.** We are the dealer — we have authoritative
