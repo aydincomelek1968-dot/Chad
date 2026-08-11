@@ -73,13 +73,29 @@
       "key": "lundes",
       "name": "Lunde's Peoria Volkswagen",
       "srp_url": "https://www.peoriavw.com/searchnew.aspx",
-      "platform": "auto-detect",
+      "platform": "dealeron",
       "page_param": "start",
       "page_size": 20,
-      "verified": "2026-08-11 HTTP 200, ~20 VINs on first page",
-      "notes": "Sincro/DealerOn-family markers present. Lower VIN yield per page than the DDC stores - page through fully before trusting a model count.",
+      "verified": "2026-08-11 HTTP 200 but SRP is JS-rendered. dealeron_tagging_data JSON gives VINs + itemCount=229 only; no pricing in markup. Parser yields 0 records.",
+      "notes": [
+        "DealerOn platform (dealerId 12273). The page carries a script tag",
+        "id='dealeron_tagging_data' with {dealerId,pageId,items:[VIN...],itemCount}.",
+        "That gives the VIN list for the page and the TRUE total (229) - useful as a",
+        "collection validation target - but carries no pricing.",
+        "",
+        "Vehicle cards render client-side and no prices appear in the served markup.",
+        "Guessed DealerOn API endpoints all 404'd; do not keep guessing.",
+        "",
+        "Currently extracts 0 records. Treat Lunde's figures as MISSING, not zero.",
+        "Unblock with one saved rendered SRP, then write a parser.",
+        "",
+        "NOTE: itemCount 229 vs cars.com 188 - reconcile before trusting either as",
+        "the inventory-depth figure."
+      ],
       "carscom_url": "https://www.cars.com/dealers/176673/lundes-peoria-volkswagen/inventory/?stock_type=new",
-      "carscom_units_verified": 188
+      "carscom_units_verified": 188,
+      "dealer_id": "12273",
+      "expected_unit_count": 229
     },
     {
       "key": "berge",
