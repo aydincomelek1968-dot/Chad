@@ -47,20 +47,39 @@ navigation shell — the vehicle cards are rendered client-side. It does return 
 page title, which reported **127 new units**. Useful as a validation target, not as
 data.
 
-**So: a real browser is required.** Use the `cloakbrowser` skill, then parse the
-saved HTML:
+**What works today: per-model pages via a markdown-converting fetcher.** The main
+SRP at `/new-vehicles/` returns only the navigation shell, but the per-model pages
+render their listings and are readable:
 
-```bash
-python3 scripts/extract_inventory.py --html saved_vwns.html \
-  --dealer vwnorthscottsdale > data/raw/vwnorthscottsdale.json
+```
+https://www.vwnorthscottsdale.com/new-vehicles/{model}/
+   models: jetta, jetta-gli, taos, tiguan, atlas, atlas-cross-sport,
+           id-4, id-buzz, golf-gti, golf-r
 ```
 
-**Not yet verified:** browser-based collection of this site has *not* been proven
-end-to-end. The attempt was made in a sandbox whose egress proxy the stealth browser
-could not traverse — it failed to reach any site, including `example.com`, so the
-failure says nothing about Cloudflare or about this dealer. On a normal machine with
-direct network access this is the expected-to-work path, but treat the first run as a
-test rather than an assumption.
+Verified: the Tiguan page returned 32 units with VIN and MSRP; the specials page
+confirmed all 127 across the lineup. Collecting model-by-model also chunks the work
+naturally and sidesteps SRP pagination.
+
+**What these pages do NOT give: any discount.** Every listing shows MSRP and nothing
+else — no dealer discount, no rebate, no sale price, no "contact for price" prompt.
+Vehicle detail pages did not expose an itemized ladder either. So our own discount
+*composition* is not recoverable from our public site.
+
+That is a finding in its own right, not just a collection obstacle — see
+"Displaying MSRP only" in `references/analysis-playbook.md`.
+
+**Browser route unproven.** A rendering browser would be the way to reach the JS
+layer, but this could not be tested here: the sandbox blocks browser egress entirely
+(port-level refusal, failing even on `example.com`), so neither CloakBrowser nor
+stock Playwright Chromium could reach any site. That says nothing about Cloudflare or
+about this dealer. On a machine with normal network access it is worth trying, but
+treat the first run as a test.
+
+**Preferred route for our own store: the DMS or inventory feed.** We are the dealer.
+The feed carries MSRP, actual selling price, cost, true days-in-stock, and the
+discount composition our website does not publish. It is strictly better than
+anything scraped and it moots the whole access problem.
 
 Fallbacks if the browser route does not pan out:
 

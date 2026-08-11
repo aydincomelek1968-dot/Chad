@@ -38,6 +38,36 @@ gross should move them, and the reasoning above is what to reason from.
 Always report the **sample size** alongside the position. "Uncompetitive on Atlas
 (n=2)" is a hypothesis; at n=14 it is a finding.
 
+## 1b. Displaying MSRP only — check this before any discount math
+
+Before comparing discount levels, check whether we are showing a discounted price at
+all. Observed 2026-08-11 across our Tiguan and Jetta pages and the specials page
+(127 units): **every listing shows MSRP and nothing else** — no dealer discount, no
+rebate, no sale price, not even a "contact us for price" prompt. Same-day,
+Camelback advertised a Jetta at $24,613 against $26,876 MSRP, and Chapman at $24,866.
+
+If that holds, it outranks every finding in this playbook, because it is not a
+pricing problem — it is a *merchandising* one:
+
+- Shoppers sort and filter search results by price. A unit displaying full sticker
+  loses the comparison before anyone reads the trim.
+- Third-party syndication may still show a discounted figure, so the same car can
+  look cheaper on cars.com than on our own site — we lose the click we paid for.
+- No amount of additional dealer discount helps if the discounted number never
+  reaches the listing.
+
+**Do not confuse display with policy.** MSRP-only online does not mean we sell at
+MSRP; the store may discount hard in person. Confirm with management which it is,
+because the two call for opposite responses:
+
+| If | Then |
+|---|---|
+| We discount in the deal but don't publish it | Merchandising fix — publish the price. Cheap, fast, no gross cost. |
+| We genuinely hold near MSRP | Real pricing decision — run the full playbook below. |
+
+The first case is the single highest-return action in this analysis: it costs no
+gross at all and changes what every online shopper sees.
+
 ## 2. Inventory pressure
 
 Price alone is half the picture. The same $1,000 gap means different things at 15
