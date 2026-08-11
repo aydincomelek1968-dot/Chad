@@ -1,0 +1,72 @@
+{
+  "_comment": [
+    "Copy to dealerships.json and fill in `our_dealer`. Everything downstream keys",
+    "off it, and the analysis refuses to run without it.",
+    "",
+    "Competitor URLs and platforms below were verified live. Dealer websites get",
+    "replatformed without notice, so if a dealer suddenly extracts 0 units, assume",
+    "the site changed before assuming the dealer ran out of cars."
+  ],
+
+  "our_dealer": "REPLACE_ME",
+
+  "market": "Phoenix / Scottsdale, AZ",
+  "compare_on_fee_excluded_basis": true,
+
+  "dealerships": [
+    {
+      "key": "REPLACE_ME",
+      "name": "<our dealership name>",
+      "is_us": true,
+      "srp_url": "<our new-inventory search results page URL>",
+      "platform": "auto-detect",
+      "notes": "Fill this in first. Without it there is no 'us' to compare against."
+    },
+    {
+      "key": "lundes",
+      "name": "Lunde's Peoria Volkswagen",
+      "srp_url": "https://www.peoriavw.com/searchnew.aspx",
+      "platform": "auto-detect",
+      "page_param": "start",
+      "page_size": 20,
+      "verified": "2026-08-11 HTTP 200, ~20 VINs on first page",
+      "notes": "Sincro/DealerOn-family markers present. Lower VIN yield per page than the DDC stores - page through fully before trusting a model count."
+    },
+    {
+      "key": "berge",
+      "name": "Berge Volkswagen (Gilbert)",
+      "srp_url": "https://www.bergevw.com/search/?tp=new",
+      "platform": "auto-detect",
+      "verified": "2026-08-11 HTTP 403 to plain requests - BOT BLOCKED",
+      "notes": "Blocks scripted fetches. Use the cloakbrowser skill. Largest VW store in the Phoenix market by its own claim, so omitting it materially distorts any market average - never let this one silently drop out."
+    },
+    {
+      "key": "camelback",
+      "name": "Camelback Volkswagen (Phoenix)",
+      "srp_url": "https://www.camelbackvw.com/new-inventory/index.htm",
+      "platform": "dealercom",
+      "page_param": "start",
+      "page_size": 24,
+      "verified": "2026-08-11 HTTP 200, 24 units/page, full itemized dprice ladder",
+      "notes": "Advertised price INCLUDES a $599 doc fee. Every unit observed carried dealer-added accessories and conditional offers."
+    },
+    {
+      "key": "chapman",
+      "name": "Chapman Volkswagen Scottsdale",
+      "srp_url": "https://www.chapmanvw.com/search/new",
+      "alt_urls": ["https://www.chapman-vw.com/new-inventory/index.htm"],
+      "platform": "auto-detect",
+      "verified": "2026-08-11 chapmanvw.com HTTP 200 (~102 VINs); chapman-vw.com HTTP 403",
+      "notes": "Two live domains on different platforms. chapmanvw.com (Fox) responds and exposes msrp/discountsTotal/markupsTotal/rebatesEveryoneTotal. chapman-vw.com is Dealer.com and blocks scripted fetches. Confirm which one is the live retail site so inventory is not double-counted."
+    }
+  ],
+
+  "thresholds": {
+    "_comment": "Overrides for analyze_pricing.py. Anchored to VW front-end gross of roughly $1.5-2.5k/unit.",
+    "gap_leader": 150,
+    "gap_competitive": 500,
+    "gap_slightly_high": 1200,
+    "min_units_dealer_cell": 3,
+    "min_dealers_market": 2
+  }
+}

@@ -1,0 +1,3 @@
+# Skill working data — inventory snapshots are perishable and store-specific
+.claude/skills/vw-competitive-pricing/data/
+.claude/skills/vw-competitive-pricing/config/dealerships.json
