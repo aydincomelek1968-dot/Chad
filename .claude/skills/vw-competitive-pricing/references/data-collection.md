@@ -119,10 +119,8 @@ Escalate in this order:
    python3 scripts/extract_inventory.py --html saved_berge.html --dealer berge \
      > data/raw/berge.json
    ```
-2. **Try the alternate domain or a syndication source.** Some stores mirror
-   inventory to a second domain. Syndicators (Cars.com et al.) can confirm unit
-   counts and rough pricing, but their price fields are often stale or
-   normalized differently — acceptable for inventory *depth*, not for discount math.
+2. **Use cars.com syndication** — verified to reach every blocked store. See
+   "Syndication fallback" below for what it does and does not give you.
 3. **Collect manually.** A human can open the SRP and save the page.
 4. **Declare the gap.** If none of the above works, the dealer is excluded from
    every average and the report says so explicitly, by name, in the data-quality
@@ -131,6 +129,75 @@ Escalate in this order:
 Never substitute "typical market pricing" or a prior week's numbers for a dealer
 you could not reach this run. Stale data presented as current is the same failure
 as invented data, just slower-acting.
+
+## Syndication fallback (cars.com) — verified 2026-08-11
+
+Every dealer syndicates inventory to cars.com, and it reaches all three stores that
+block us directly. This is the most reliable route to full market coverage.
+
+| Dealer | cars.com dealer ID | New units |
+|---|---|---|
+| VW North Scottsdale (us) | `109556` | 126 |
+| Lunde's Peoria VW | `176673` | 188 |
+| Camelback VW | `5393241` | 140 |
+| Berge VW | `6000291` | 72 |
+| Chapman VW Scottsdale | *not yet located* | — |
+
+```
+https://www.cars.com/dealers/<id>/<slug>/inventory/?stock_type=new
+```
+
+cars.com returns 403 to plain scripted requests, but a markdown-converting fetcher
+retrieves it fine. A rendering browser is the route to bulk parsing.
+
+**Accuracy — cross-validated, not assumed.** Camelback is the one store with both a
+verified itemized ladder and a cars.com listing, so it serves as the control:
+
+| Vehicle | cars.com MSRP / price | Direct MSRP / advertised |
+|---|---|---|
+| Taos S | $28,271 / $26,120 | $28,271 / $26,120 |
+| Tiguan 2.0T S | $32,919 / $29,177 | — / $29,177 |
+
+Exact agreement. Syndicated MSRP and listed price mirror the dealer's own
+advertised price, so this is real data, not an approximation.
+
+**What it cannot do, and this is the important part.** cars.com publishes MSRP and a
+final price — nothing else. There is **no breakdown of dealer discount, universal
+rebate, or conditional incentive**. All you can derive is:
+
+```
+total_off_msrp = MSRP − listed price      (dealer money + factory money, merged)
+```
+
+That is not the lever management controls, and separating those components is the
+analytical core of this whole skill (Steps 2, 6, 7 and rules 4–5). A store showing
+$3,000 off via syndication might be giving $800 of its own money with $2,200 of VW
+cash, or the reverse — and the pricing decision is completely different in each
+case. **Never derive a dealer-discount recommendation from syndicated data alone.**
+
+Two further limits:
+
+- **Trim labels differ.** Camelback's own site lists a "1.5T Sport" Jetta that
+  cars.com renders as 1.4T/2.0T variants. Trim-level like-for-like matching needs
+  care, and VIN is the only reliable join key across the two sources.
+- **No days-in-stock**, so aging analysis (Step 5) is unavailable from syndication.
+
+**Where it fits.** Use syndication for what it is genuinely good at: full-market
+**unit counts, inventory depth, model mix, MSRP, and advertised price** — which
+covers Step 1 identity/price, Step 3 model comparison, and most of Step 5. Then get
+itemized ladders from the dealer sites that allow it (Camelback, Chapman) and treat
+the blocked stores' discount *composition* as unknown rather than inferred.
+
+The best combination is syndication for market-wide coverage plus our own DMS for
+our side, since we need our own discount composition exactly and already have it.
+
+**One observation worth verifying before acting on it:** several VW North Scottsdale
+units list *above* MSRP (a Tiguan at $47,005 against $46,307 MSRP; a Golf R at
+$57,142 against $56,444). Camelback carries $1,538 of dealer-added accessories on
+every unit, so an addendum above MSRP is entirely plausible and would mean we are
+advertising above sticker on some stock — a significant competitive finding. It
+could equally be a fee artifact in the syndicated feed. Confirm against a vehicle
+detail page before it reaches a recommendation.
 
 ## Inclusion rules
 

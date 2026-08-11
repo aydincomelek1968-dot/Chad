@@ -6,12 +6,9 @@
     "replatformed without notice, so if a dealer suddenly extracts 0 units, assume",
     "the site changed before assuming the dealer ran out of cars."
   ],
-
   "our_dealer": "vwnorthscottsdale",
-
   "market": "Phoenix / Scottsdale, AZ",
   "compare_on_fee_excluded_basis": true,
-
   "dealerships": [
     {
       "key": "vwnorthscottsdale",
@@ -44,7 +41,9 @@
         "",
         "Validate any collection run against the site's own displayed count (127 as of",
         "2026-08-11). A run returning far fewer means pagination stopped early."
-      ]
+      ],
+      "carscom_url": "https://www.cars.com/dealers/109556/volkswagen-north-scottsdale/inventory/?stock_type=new",
+      "carscom_units_verified": 126
     },
     {
       "key": "lundes",
@@ -54,7 +53,9 @@
       "page_param": "start",
       "page_size": 20,
       "verified": "2026-08-11 HTTP 200, ~20 VINs on first page",
-      "notes": "Sincro/DealerOn-family markers present. Lower VIN yield per page than the DDC stores - page through fully before trusting a model count."
+      "notes": "Sincro/DealerOn-family markers present. Lower VIN yield per page than the DDC stores - page through fully before trusting a model count.",
+      "carscom_url": "https://www.cars.com/dealers/176673/lundes-peoria-volkswagen/inventory/?stock_type=new",
+      "carscom_units_verified": 188
     },
     {
       "key": "berge",
@@ -62,7 +63,9 @@
       "srp_url": "https://www.bergevw.com/search/?tp=new",
       "platform": "auto-detect",
       "verified": "2026-08-11 HTTP 403 to plain requests - BOT BLOCKED",
-      "notes": "Blocks scripted fetches. Use the cloakbrowser skill. Largest VW store in the Phoenix market by its own claim, so omitting it materially distorts any market average - never let this one silently drop out."
+      "notes": "Blocks scripted fetches. Use the cloakbrowser skill. Largest VW store in the Phoenix market by its own claim, so omitting it materially distorts any market average - never let this one silently drop out.",
+      "carscom_url": "https://www.cars.com/dealers/6000291/berge-volkswagen/inventory/?stock_type=new",
+      "carscom_units_verified": 72
     },
     {
       "key": "camelback",
@@ -72,20 +75,25 @@
       "page_param": "start",
       "page_size": 24,
       "verified": "2026-08-11 HTTP 200, 24 units/page, full itemized dprice ladder",
-      "notes": "Advertised price INCLUDES a $599 doc fee. Every unit observed carried dealer-added accessories and conditional offers."
+      "notes": "Advertised price INCLUDES a $599 doc fee. Every unit observed carried dealer-added accessories and conditional offers.",
+      "carscom_url": "https://www.cars.com/dealers/5393241/camelback-volkswagen/inventory/?stock_type=new",
+      "carscom_units_verified": 140
     },
     {
       "key": "chapman",
       "name": "Chapman Volkswagen Scottsdale",
       "srp_url": "https://www.chapmanvw.com/search/new",
-      "alt_urls": ["https://www.chapman-vw.com/new-inventory/index.htm"],
+      "alt_urls": [
+        "https://www.chapman-vw.com/new-inventory/index.htm"
+      ],
       "platform": "auto-detect",
       "verified": "2026-08-11 chapmanvw.com HTTP 200 (~102 VINs); chapman-vw.com HTTP 403",
       "priority": "highest",
-      "notes": "Closest geographic rival - the other Scottsdale VW store, so it competes for the same walk-in and search traffic we do. Watch this one hardest. Two live domains on different platforms: chapmanvw.com (Fox) responds and exposes msrp/discountsTotal/markupsTotal/rebatesEveryoneTotal; chapman-vw.com is Dealer.com and blocks scripted fetches. Confirm which is the live retail site so inventory is not double-counted."
+      "notes": "Closest geographic rival - the other Scottsdale VW store, so it competes for the same walk-in and search traffic we do. Watch this one hardest. Two live domains on different platforms: chapmanvw.com (Fox) responds and exposes msrp/discountsTotal/markupsTotal/rebatesEveryoneTotal; chapman-vw.com is Dealer.com and blocks scripted fetches. Confirm which is the live retail site so inventory is not double-counted.",
+      "carscom_url": null,
+      "carscom_note": "dealer ID not yet located - find via cars.com dealer search"
     }
   ],
-
   "thresholds": {
     "_comment": "Overrides for analyze_pricing.py. Anchored to VW front-end gross of roughly $1.5-2.5k/unit.",
     "gap_leader": 150,
@@ -93,5 +101,6 @@
     "gap_slightly_high": 1200,
     "min_units_dealer_cell": 3,
     "min_dealers_market": 2
-  }
+  },
+  "_syndication": "cars.com reaches every blocked store and its MSRP/price match dealer sites exactly, but it publishes NO discount breakdown. Use for coverage, depth and price levels; never for dealer-discount recommendations on its own."
 }

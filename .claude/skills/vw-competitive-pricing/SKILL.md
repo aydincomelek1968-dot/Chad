@@ -59,12 +59,26 @@ competing for the same walk-in and local-search traffic — so its moves matter 
 Copy `config/dealerships.example.json` to `dealerships.json`; it already carries
 verified URLs, platforms, and per-site collection notes for all five stores.
 
-**Our own site is the hard one.** `vwnorthscottsdale.com` sits behind Cloudflare bot
-management and renders listings in JavaScript, so it returns a block page to scripted
-fetches and a bare nav shell to simple renderers. Collecting it needs a real browser
-(see `references/data-collection.md`). This is not an edge case to route around: every
-figure in the report is relative to us, so a run that misses our store yields no
-analysis at all — not a partial one. Resolve it before spending effort on competitors.
+**Three of the six endpoints block scripted access — including our own.**
+`vwnorthscottsdale.com` sits behind Cloudflare and renders listings in JavaScript, as
+do Berge and one of Chapman's two domains. Our own store is not an edge case to route
+around: every figure in the report is relative to us, so a run that misses it yields
+no analysis at all.
+
+Two routes exist, and they are complementary rather than alternatives:
+
+- **cars.com syndication** reaches every blocked store (verified: 126 units for us,
+  188 Lunde's, 140 Camelback, 72 Berge) and its MSRP and advertised price match the
+  dealer's own figures exactly. But it publishes **only MSRP and a final price** — no
+  split between dealer discount, factory cash, and conditional rebates. Good for
+  market-wide coverage, inventory depth, and price levels; never sufficient on its
+  own for a discount recommendation.
+- **Itemized ladders** come from the dealer sites that allow direct collection
+  (Camelback, Chapman) — these carry the component breakdown the analysis turns on.
+
+For our own store, prefer the **DMS or inventory feed**: we need our discount
+composition exactly, and we already own that data. See
+`references/data-collection.md`.
 
 ## Workflow
 
