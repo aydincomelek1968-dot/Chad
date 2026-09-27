@@ -57,7 +57,7 @@ def money(v):
         return None
 
 
-def fetch(url, timeout=60, retries=4):
+def fetch(url, timeout=60, retries=6, base_delay=5.0):
     """Fetch a page, returning (html, status).
 
     Two hard-won details live here:
@@ -77,7 +77,7 @@ def fetch(url, timeout=60, retries=4):
         "-H", "Accept-Language: en-US,en;q=0.9",
         "-H", "Cache-Control: no-cache",
     ]
-    delay, status, body = 3.0, 0, ""
+    delay, status, body = base_delay, 0, ""
     for attempt in range(retries):
         try:
             p = subprocess.run(
@@ -191,13 +191,26 @@ def parse_ddc_pricing(pricing):
         elif rtype in DDC_UNIVERSAL or tc == "SICRule":
             out["universal_incentive"] += val
             out["universal_detail"].append({"label": label, "amount": val})
-        elif row.get("isFinalPrice") or tc == "SIFRule":
-            out["advertised_price"] = val
         elif tc == "askingPrice":
             # Dealer-added accessories / addendum sitting on top of MSRP.
+            # Checked BEFORE isFinalPrice on purpose: on units with no sale price
+            # DDC sets isFinalPrice=True on THIS row, so testing isFinalPrice first
+            # records the accessories total as the car's price. Observed live
+            # turning a $25,145 Jetta into a "$1,538" one on 16 of 24 units.
             out["dealer_addons"] = val
+        elif row.get("isFinalPrice") or tc in ("SIFRule", "priceAfterFees"):
+            # priceAfterFees is the displayed price on units with no incentive
+            # ladder: MSRP - dealer discount + fees.
+            out["advertised_price"] = val
     if not out["advertised_price"]:
-        out["advertised_price"] = money((pricing or {}).get("retailPrice"))
+        # Some units show no final price (in-transit, "unlock price"). The
+        # retailPrice fallback can then hold an unrelated figure -- observed live
+        # returning the $1,538 accessories total as if it were the car's price.
+        # Sanity-check it, and leave the price unknown rather than wrong: MSRP and
+        # dealer discount are still real and still worth keeping.
+        rp = money((pricing or {}).get("retailPrice"))
+        if rp is not None and out["msrp"] and rp >= out["msrp"] * 0.4:
+            out["advertised_price"] = rp
     # Same reasoning as above: a parsed ladder with no discount row means the
     # dealer shows no discount on this car -- which is data, not absence of it.
     if out["dealer_discount"] is None and out["msrp"] and out["advertised_price"]:
@@ -516,6 +529,11 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--out-dir")
     ap.add_argument("--max-pages", type=int, default=25)
+    ap.add_argument("--pace", type=float, default=5.0,
+                    help="seconds between pages, and the backoff base. Raise it if a "
+                         "dealer starts returning 403 mid-walk -- that is throttling, "
+                         "not a block, and patience collects the whole store.")
+    ap.add_argument("--retries", type=int, default=6)
     args = ap.parse_args()
 
     targets = []
@@ -544,8 +562,8 @@ def main():
             sep = "&" if "?" in url else "?"
             purl = url if page == 0 else f"{url}{sep}{page_param}={page * page_size}"
             if page:
-                time.sleep(2.0)   # these sites throttle a burst; pace the walk
-            html, status = fetch(purl)
+                time.sleep(args.pace)   # these sites throttle a burst; pace the walk
+            html, status = fetch(purl, retries=args.retries, base_delay=args.pace)
             if status in (403, 429) or (status == 0 and page == 0):
                 blocked.append((key, purl, status))
                 print(f"  BLOCKED http={status} -> needs a real browser "
