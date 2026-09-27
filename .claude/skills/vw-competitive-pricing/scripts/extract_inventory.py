@@ -29,7 +29,9 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import date, datetime
@@ -55,21 +57,55 @@ def money(v):
         return None
 
 
-def fetch(url, timeout=60):
-    """Returns (html, status). status 403/429 means bot-blocked, not absent."""
-    req = urllib.request.Request(url, headers={
-        "User-Agent": UA,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-    })
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return r.read().decode("utf-8", "replace"), r.status
-    except urllib.error.HTTPError as e:
-        return "", e.code
-    except Exception as e:
-        print(f"  ! fetch error: {e}", file=sys.stderr)
-        return "", 0
+def fetch(url, timeout=60, retries=4):
+    """Fetch a page, returning (html, status).
+
+    Two hard-won details live here:
+
+    1. **Use curl, not urllib.** Cloudflare-fronted dealer sites fingerprint the
+       TLS/HTTP client. urllib gets a flat 403 on pages curl retrieves fine, so a
+       urllib-only extractor reports a dealer as "blocked" when it is reachable.
+
+    2. **A 403 is often rate limiting, not a wall.** These sites throttle after a
+       burst and recover within seconds. Recording the first 403 as "blocked"
+       silently drops a whole dealer from the market average, so back off and
+       retry before believing it.
+    """
+    headers = [
+        "-A", UA,
+        "-H", "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "-H", "Accept-Language: en-US,en;q=0.9",
+        "-H", "Cache-Control: no-cache",
+    ]
+    delay, status, body = 3.0, 0, ""
+    for attempt in range(retries):
+        try:
+            p = subprocess.run(
+                ["curl", "-sL", "--compressed", "--max-time", str(timeout)]
+                + headers + ["-w", "\n__HTTP__%{http_code}", url],
+                capture_output=True, text=True, timeout=timeout + 20)
+            out = p.stdout or ""
+        except Exception as e:
+            print(f"  ! fetch error: {e}", file=sys.stderr)
+            return "", 0
+        i = out.rfind("\n__HTTP__")
+        if i == -1:
+            return out, 0
+        try:
+            status = int(out[i + 9:].strip() or 0)
+        except ValueError:
+            status = 0
+        body = out[:i]
+        if status == 200:
+            return body, 200
+        if status in (403, 429, 503) and attempt < retries - 1:
+            print(f"  .. http {status}, backing off {delay:.0f}s "
+                  f"(attempt {attempt + 1}/{retries})", file=sys.stderr)
+            time.sleep(delay)
+            delay *= 2
+            continue
+        break
+    return body, status
 
 
 # ---------------------------------------------------------------- JSON walking
@@ -162,6 +198,10 @@ def parse_ddc_pricing(pricing):
             out["dealer_addons"] = val
     if not out["advertised_price"]:
         out["advertised_price"] = money((pricing or {}).get("retailPrice"))
+    # Same reasoning as above: a parsed ladder with no discount row means the
+    # dealer shows no discount on this car -- which is data, not absence of it.
+    if out["dealer_discount"] is None and out["msrp"] and out["advertised_price"]:
+        out["dealer_discount"] = 0.0
     return out
 
 
@@ -261,7 +301,11 @@ def extract_fox(html):
             "is_courtesy": o.get("isCourtesy"),
             "in_transit": o.get("isInTransit"),
             "msrp": msrp,
-            "dealer_discount": disc or None,
+            # A reported 0 is a REAL zero discount, not missing data. Coercing it
+            # to None drops the car from the dealer's average, which silently
+            # computes that dealer's discount over only the cars they discount --
+            # observed live inflating a competitor's Jetta average 6x.
+            "dealer_discount": disc,
             "dealer_addons": markup or None,
             "universal_incentive": reb_everyone,
             "universal_applied": bool(reb_applied),
@@ -499,6 +543,8 @@ def main():
         while page < args.max_pages:
             sep = "&" if "?" in url else "?"
             purl = url if page == 0 else f"{url}{sep}{page_param}={page * page_size}"
+            if page:
+                time.sleep(2.0)   # these sites throttle a burst; pace the walk
             html, status = fetch(purl)
             if status in (403, 429) or (status == 0 and page == 0):
                 blocked.append((key, purl, status))

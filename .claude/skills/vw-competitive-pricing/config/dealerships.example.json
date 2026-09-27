@@ -114,7 +114,7 @@
       "platform": "dealercom",
       "page_param": "start",
       "page_size": 24,
-      "verified": "2026-08-11 HTTP 200, 24 units/page, full itemized dprice ladder",
+      "verified": "2026-09-27 HTTP 200, full pagination to 127 units with backoff. Rate-limits a burst - pace requests.",
       "notes": "Advertised price INCLUDES a $599 doc fee. Every unit observed carried dealer-added accessories and conditional offers.",
       "carscom_url": "https://www.cars.com/dealers/5393241/camelback-volkswagen/inventory/?stock_type=new",
       "carscom_units_verified": 140
@@ -127,11 +127,12 @@
         "https://www.chapman-vw.com/new-inventory/index.htm"
       ],
       "platform": "auto-detect",
-      "verified": "2026-08-11 chapmanvw.com HTTP 200 (~102 VINs); chapman-vw.com HTTP 403",
+      "verified": "2026-09-27 HTTP 200, 100 units served server-side. Pagination is CLIENT-SIDE: page/start/offset/p/pageNumber all return the same first 100. Store claims ~218 total, so this is a PARTIAL collection.",
       "priority": "highest",
       "notes": "Closest geographic rival - the other Scottsdale VW store, so it competes for the same walk-in and search traffic we do. Watch this one hardest. Two live domains on different platforms: chapmanvw.com (Fox) responds and exposes msrp/discountsTotal/markupsTotal/rebatesEveryoneTotal; chapman-vw.com is Dealer.com and blocks scripted fetches. Confirm which is the live retail site so inventory is not double-counted.",
       "carscom_url": null,
-      "carscom_note": "dealer ID not yet located - find via cars.com dealer search"
+      "carscom_note": "dealer ID not yet located - find via cars.com dealer search",
+      "page_cap": 100
     }
   ],
   "thresholds": {
